@@ -25,19 +25,18 @@ function arcLabel(radius,angle,text,size,color,id){
 }
 function renderWheel(){
   const p=profiles[profile];
-  let html='<circle cx="360" cy="360" r="397" fill="#fbfaf6" stroke="#c9cdbb"/><circle cx="360" cy="360" r="309" fill="none" stroke="#d9ddcc"/>';
+  let html='<circle cx="360" cy="360" r="365" fill="#fbfaf6" stroke="#c9cdbb"/><circle cx="360" cy="360" r="309" fill="none" stroke="#d9ddcc"/>';
   html+='<g class="outer-ring" tabindex="0" role="slider" aria-label="ตำแหน่งวงฉางเซิง ใช้ลูกศรซ้ายหรือขวาหมุนทีละช่อง" aria-valuemin="0" aria-valuemax="11" aria-valuenow="'+offset+'" aria-valuetext="'+(practice?'โหมดท่องจำ':'長生 ตรงกับ '+branches[offset].han+' '+branches[offset].zodiac)+'">';
   for(let i=0;i<12;i++){
     const a=i*30+rotation,show=!practice||(revealed&&wrap(i+offset)===selected);
     html+=`<path d="${sector(201,296,a)}" fill="${highlightedPhases.has(i)&&!practice?phaseColors[profile]:'#f6f3e9'}" stroke="#d6d9c9" stroke-width="1"/>`;
-    const fill=highlightedPhases.has(i)&&!practice?phaseColors[profile]:'#f6f3e9';
-    html+=`<path class="meaning-sector" d="${sector(313,389,a)}" fill="${fill}" stroke="#d6d9c9" stroke-width="1"/>`;
+    html+=`<path class="meaning-sector" d="${sector(313,357,a)}" fill="#f5f2e9" stroke="#e3e3d8" stroke-width="1"/>`;
     html+=arcLabel(270,a,show?phases[i].han:'?',30,i===0?p.color:'#34483b',`phase-han-${i}`);
     if(show){
       html+=arcLabel(235,a,phases[i].reading,21,'#65745f',`phase-thai-${i}`);
-      html+=arcLabel(353,a,phaseDescriptions[i],22,'#34483b',`meaning-${i}`);
+      html+=arcLabel(338,a,phaseDescriptions[i],18,'#858a80',`meaning-${i}`);
     }else{
-      html+=arcLabel(353,a,'· · ·',22,'#909584',`meaning-${i}`);
+      html+=arcLabel(338,a,'· · ·',18,'#a2a79a',`meaning-${i}`);
     }
   }
   html+='</g>';
