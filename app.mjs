@@ -5,6 +5,7 @@ let profile='wood', offset=profiles.wood.start, selected=0, practice=false, reve
 let rotation=offset*30, destination=rotation, motionFrame=0, dragFrame=0;
 const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
 const colors={spring:'#dfecdd',summer:'#f6dfcc',autumn:'#ece2c6',winter:'#dce8eb'};
+const selectedColors={spring:'#d0dfcc',summer:'#ecd0b7',autumn:'#ded2af',winter:'#cbdde2'};
 // 長生, 帝旺 and 墓 share the element palette of the selected yang stem.
 const phaseColors={wood:'#c9dfc0',fire:'#f1c0a5',metal:'#d3d7db',water:'#bed5eb'};
 const highlightedPhases=new Set([0,4,8]);
@@ -43,7 +44,7 @@ function renderWheel(){
   html+='</g>';
   for(let i=0;i<12;i++){
     const b=branches[i],a=i*30;
-    html+=`<g class="branch" data-branch="${i}" tabindex="0" role="button" aria-label="${b.han} ${b.reading} ${b.zodiac} ${b.element} ฤดู${b.season}" aria-pressed="${selected===i}"><path d="${sector(114,196,a)}" fill="${colors[b.key]}" stroke="#fbfaf6" stroke-width="2"/>`;
+    html+=`<g class="branch" data-branch="${i}" tabindex="0" role="button" aria-label="${b.han} ${b.reading} ${b.zodiac} ${b.element} ฤดู${b.season}" aria-pressed="${selected===i}"><path d="${sector(114,196,a)}" fill="${selected===i?selectedColors[b.key]:colors[b.key]}" stroke="#fbfaf6" stroke-width="2"/>`;
     html+=arcLabel(155,a,b.han,44,'#2e463c',`branch-han-${i}`,true)+'</g>';
   }
   html+='<circle cx="360" cy="360" r="106" fill="#fbfaf6" stroke="#d4d9c9"/><circle cx="360" cy="360" r="97" fill="none" stroke="#e6e8dc"/>';
