@@ -5,6 +5,9 @@ let profile='wood', offset=profiles.wood.start, selected=0, practice=false, reve
 let rotation=offset*30, destination=rotation, motionFrame=0, dragFrame=0;
 const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
 const colors={spring:'#dfecdd',summer:'#f6dfcc',autumn:'#ece2c6',winter:'#dce8eb'};
+// 長生, 帝旺 and 墓 share the element palette of the selected yang stem.
+const phaseColors={wood:'#c9dfc0',fire:'#f1c0a5',metal:'#d3d7db',water:'#bed5eb'};
+const highlightedPhases=new Set([0,4,8]);
 // Chinese compass orientation: south above, north below (午 top, 子 bottom).
 const point=(radius,angle)=>[360+radius*Math.sin((angle+180)*Math.PI/180),360-radius*Math.cos((angle+180)*Math.PI/180)];
 const sector=(inner,outer,angle)=>{
@@ -18,7 +21,7 @@ function renderWheel(){
   html+='<g class="outer-ring" tabindex="0" role="slider" aria-label="ตำแหน่งวงฉางเซิง ใช้ลูกศรซ้ายหรือขวาหมุนทีละช่อง" aria-valuemin="0" aria-valuemax="11" aria-valuenow="'+offset+'" aria-valuetext="'+(practice?'โหมดท่องจำ':'長生 ตรงกับ '+branches[offset].han+' '+branches[offset].zodiac)+'">';
   for(let i=0;i<12;i++){
     const a=i*30+rotation,show=!practice||(revealed&&wrap(i+offset)===selected);
-    html+=`<path d="${sector(201,296,a)}" fill="${i===0&&!practice?'#e2eadb':'#f6f3e9'}" stroke="#d6d9c9" stroke-width="1"/>`;
+    html+=`<path d="${sector(201,296,a)}" fill="${highlightedPhases.has(i)&&!practice?phaseColors[profile]:'#f6f3e9'}" stroke="#d6d9c9" stroke-width="1"/>`;
     html+=label(253,a,show?phases[i].han:'?',28,i===0?p.color:'#34483b',show?-15:0);
     if(show)html+=label(253,a,phases[i].reading,18,'#65745f',18);
   }
