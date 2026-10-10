@@ -5,4 +5,4 @@
 @media(max-width:360px){header{padding:14px 16px 12px}.profile-grid{gap:5px;margin-left:0;margin-right:0}.profile-grid button{gap:5px;font-size:11px}.profile-grid .han{font-size:22px}main{padding-left:8px;padding-right:8px}.seasons{gap:12px;font-size:10px}.rotation-controls button{font-size:12px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
-#wheel .branch:focus{outline:none}
+#wheel .branch:focus,#wheel .phase:focus{outline:none}

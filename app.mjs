@@ -1,7 +1,7 @@
 import {branches,phases,profiles,wrap,snap,angleDelta} from './core.mjs';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
-let profile='wood', offset=profiles.wood.start, selected=0, practice=false, revealed=false, drag=null;
+let profile='wood', offset=profiles.wood.start, selected=0, practice=false, revealed=false, drag=null, selectedPhase=null;
 let rotation=offset*30, destination=rotation, motionFrame=0, dragFrame=0;
 const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
 const colors={spring:'#dfecdd',summer:'#f6dfcc',autumn:'#ece2c6',winter:'#dce8eb'};
@@ -9,6 +9,7 @@ const selectedColors={spring:'#d0dfcc',summer:'#ecd0b7',autumn:'#ded2af',winter:
 // 長生, 帝旺 and 墓 share the element palette of the selected yang stem.
 const phaseColors={wood:'#c9dfc0',fire:'#f1c0a5',metal:'#d3d7db',water:'#bed5eb'};
 const highlightedPhases=new Set([0,4,8]);
+const shade=color=>'#'+color.slice(1).match(/../g).map(channel=>Math.round(parseInt(channel,16)*.92).toString(16).padStart(2,'0')).join('');
 // Chinese compass orientation: south above, north below (午 top, 子 bottom).
 const point=(radius,angle)=>[360+radius*Math.sin((angle+180)*Math.PI/180),360-radius*Math.cos((angle+180)*Math.PI/180)];
 const sector=(inner,outer,angle)=>{
@@ -31,7 +32,8 @@ function renderWheel(){
   html+='<g class="outer-ring" tabindex="0" role="slider" aria-label="ตำแหน่งวงฉางเซิง ใช้ลูกศรซ้ายหรือขวาหมุนทีละช่อง" aria-valuemin="0" aria-valuemax="11" aria-valuenow="'+offset+'" aria-valuetext="'+(practice?'โหมดท่องจำ':'長生 ตรงกับ '+branches[offset].han+' '+branches[offset].zodiac)+'">';
   for(let i=0;i<12;i++){
     const a=i*30+rotation,show=!practice||(revealed&&wrap(i+offset)===selected);
-    html+=`<path d="${sector(201,296,a)}" fill="${highlightedPhases.has(i)&&!practice?phaseColors[profile]:'#f6f3e9'}" stroke="#d6d9c9" stroke-width="1"/>`;
+    const base=highlightedPhases.has(i)&&!practice?phaseColors[profile]:'#f6f3e9';
+    html+=`<g class="phase" data-phase="${i}" tabindex="0" role="button" aria-label="${show?phases[i].han+' '+phases[i].reading:'ระยะที่ซ่อนไว้'}" aria-pressed="${selectedPhase===i}"><path class="phase-sector" d="${sector(201,296,a)}" fill="${selectedPhase===i?shade(base):base}" stroke="#d6d9c9" stroke-width="1"/>`;
     html+=`<path class="meaning-sector" d="${sector(313,335,a)}" fill="#f5f2e9" stroke="#e3e3d8" stroke-width="1"/>`;
     html+=arcLabel(show?263:249,a,show?phases[i].han:'?',34,i===0?p.color:'#34483b',`phase-han-${i}`,true);
     if(show){
@@ -40,6 +42,7 @@ function renderWheel(){
     }else{
       html+=arcLabel(324,a,'· · ·',16,'#a9ada3',`meaning-${i}`,true);
     }
+    html+='</g>';
   }
   html+='</g>';
   for(let i=0;i<12;i++){
@@ -51,9 +54,9 @@ function renderWheel(){
   html+='<path d="M360 278 L353 296 L360 290 L367 296Z" fill="'+p.color+'"/>';
   html+=label(0,0,p.han,48,p.color,-24)+label(0,0,p.name,20,'#34483b',20)+label(0,0,'12 กิ่งดิน',16,'#87907c',51);
   const active=document.activeElement;
-  const focus=active?.closest('.outer-ring')?'outer':active?.dataset.branch;
+  const focus=active?.dataset.phase!==undefined?'phase-'+active.dataset.phase:active?.closest('.outer-ring')?'outer':active?.dataset.branch;
   svg.innerHTML=html;
-  if(focus!==undefined){const target=focus==='outer'?svg.querySelector('.outer-ring'):svg.querySelector(`[data-branch="${focus}"]`);target?.focus({preventScroll:true});}
+  if(focus!==undefined){const target=focus==='outer'?svg.querySelector('.outer-ring'):focus.startsWith('phase-')?svg.querySelector(`[data-phase="${focus.slice(6)}"]`):svg.querySelector(`[data-branch="${focus}"]`);target?.focus({preventScroll:true});}
 }
 function renderControls(){
   const p=profiles[profile];
@@ -82,6 +85,7 @@ function animateTo(target){
 }
 function rotate(step){animateTo((motionFrame?destination:Math.round(rotation/30)*30)+step*30);}
 function alignProfile(){const target=profiles[profile].start*30;animateTo(rotation+angleDelta(target,((rotation%360)+360)%360));}
+function choosePhase(i){selectedPhase=i;if(practice){selected=wrap(i+offset);revealed=false;}renderWheel();renderControls();svg.querySelector(`[data-phase="${i}"]`)?.focus({preventScroll:true});}
 function chooseBranch(i){selected=i;revealed=false;renderWheel();renderControls();svg.querySelector(`[data-branch="${i}"]`)?.focus({preventScroll:true});}
 $('profiles').addEventListener('click',e=>{const button=e.target.closest('[data-profile]');if(!button)return;profile=button.dataset.profile;alignProfile();$('profiles').querySelector(`[data-profile="${profile}"]`).focus({preventScroll:true});});
 $('prev').addEventListener('click',()=>rotate(-1));$('next').addEventListener('click',()=>rotate(1));
@@ -90,6 +94,8 @@ $('practice').addEventListener('change',e=>{practice=e.target.checked;revealed=f
 $('reveal').addEventListener('click',()=>{revealed=true;renderWheel();renderControls();});
 svg.addEventListener('click',e=>{const branch=e.target.closest('[data-branch]');if(branch)chooseBranch(Number(branch.dataset.branch));});
 svg.addEventListener('keydown',e=>{
+  const phase=e.target.closest('[data-phase]');
+  if(phase&&(e.key==='Enter'||e.key===' ')){e.preventDefault();choosePhase(Number(phase.dataset.phase));return;}
   const branch=e.target.closest('[data-branch]');
   if(branch&&(e.key==='Enter'||e.key===' ')){e.preventDefault();chooseBranch(Number(branch.dataset.branch));}
   if(e.target.closest('.outer-ring')&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){
@@ -99,17 +105,21 @@ svg.addEventListener('keydown',e=>{
 function pointerAngle(e){const box=svg.getBoundingClientRect();return Math.atan2(e.clientX-box.left-box.width/2,-(e.clientY-box.top-box.height/2))*180/Math.PI;}
 svg.addEventListener('pointerdown',e=>{
   if(!e.target.closest('.outer-ring')||!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0))return;
-  e.preventDefault();cancelMotion();drag={id:e.pointerId,last:pointerAngle(e)};revealed=false;renderControls();svg.setPointerCapture(e.pointerId);svg.classList.add('dragging');$('step-status').textContent='ปล่อยเพื่อลงล็อก';
+  e.preventDefault();cancelMotion();drag={id:e.pointerId,last:pointerAngle(e),x:e.clientX,y:e.clientY,moved:false,phase:e.target.closest('[data-phase]')?.dataset.phase};revealed=false;renderControls();svg.setPointerCapture(e.pointerId);svg.classList.add('dragging');$('step-status').textContent='ปล่อยเพื่อลงล็อก';
 });
 svg.addEventListener('pointermove',e=>{
   if(!drag||e.pointerId!==drag.id)return;
+  if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<6)return;
+  drag.moved=true;
   const angle=pointerAngle(e);rotation+=angleDelta(angle,drag.last);drag.last=angle;
   if(!dragFrame)dragFrame=requestAnimationFrame(()=>{dragFrame=0;renderWheel();});
 });
 function stopDrag(e){
   if(!drag||e.pointerId!==drag.id)return;
+  const tappedPhase=!drag.moved?drag.phase:undefined;
   drag=null;svg.classList.remove('dragging');if(svg.hasPointerCapture(e.pointerId))svg.releasePointerCapture(e.pointerId);
   animateTo(Math.round(rotation/30)*30);
+  if(e.type==='pointerup'&&tappedPhase!==undefined)choosePhase(Number(tappedPhase));
 }
 svg.addEventListener('pointerup',stopDrag);svg.addEventListener('pointercancel',stopDrag);svg.addEventListener('lostpointercapture',stopDrag);
 renderWheel();renderControls();
