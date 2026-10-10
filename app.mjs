@@ -32,9 +32,9 @@ function renderWheel(){
     const a=i*30+rotation,show=!practice||(revealed&&wrap(i+offset)===selected);
     html+=`<path d="${sector(201,296,a)}" fill="${highlightedPhases.has(i)&&!practice?phaseColors[profile]:'#f6f3e9'}" stroke="#d6d9c9" stroke-width="1"/>`;
     html+=`<path class="meaning-sector" d="${sector(313,335,a)}" fill="#f5f2e9" stroke="#e3e3d8" stroke-width="1"/>`;
-    html+=arcLabel(270,a,show?phases[i].han:'?',30,i===0?p.color:'#34483b',`phase-han-${i}`);
+    html+=arcLabel(show?263:249,a,show?phases[i].han:'?',34,i===0?p.color:'#34483b',`phase-han-${i}`,true);
     if(show){
-      html+=arcLabel(235,a,phases[i].reading,21,'#65745f',`phase-thai-${i}`);
+      html+=arcLabel(232,a,phases[i].reading,20,'#65745f',`phase-thai-${i}`,true);
       html+=arcLabel(324,a,phaseDescriptions[i],16,'#969b92',`meaning-${i}`,true);
     }else{
       html+=arcLabel(324,a,'· · ·',16,'#a9ada3',`meaning-${i}`,true);
@@ -44,7 +44,7 @@ function renderWheel(){
   for(let i=0;i<12;i++){
     const b=branches[i],a=i*30;
     html+=`<g class="branch" data-branch="${i}" tabindex="0" role="button" aria-label="${b.han} ${b.reading} ${b.zodiac} ${b.element} ฤดู${b.season}" aria-pressed="${selected===i}"><path d="${sector(114,196,a)}" fill="${colors[b.key]}" stroke="${selected===i?p.color:'#fbfaf6'}" stroke-width="${selected===i?3:2}"/>`;
-    html+=arcLabel(170,a,b.han,36,'#2e463c',`branch-han-${i}`)+arcLabel(138,a,b.zodiac,21,'#52685e',`branch-thai-${i}`)+'</g>';
+    html+=arcLabel(155,a,b.han,44,'#2e463c',`branch-han-${i}`,true)+'</g>';
   }
   html+='<circle cx="360" cy="360" r="106" fill="#fbfaf6" stroke="#d4d9c9"/><circle cx="360" cy="360" r="97" fill="none" stroke="#e6e8dc"/>';
   html+='<path d="M360 278 L353 296 L360 290 L367 296Z" fill="'+p.color+'"/>';
