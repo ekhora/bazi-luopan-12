@@ -5,7 +5,8 @@ let profile='wood', offset=profiles.wood.start, selected=0, practice=false, reve
 let rotation=offset*30, destination=rotation, motionFrame=0, dragFrame=0;
 const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
 const colors={spring:'#dfecdd',summer:'#f6dfcc',autumn:'#ece2c6',winter:'#dce8eb'};
-const point=(radius,angle)=>[360+radius*Math.sin(angle*Math.PI/180),360-radius*Math.cos(angle*Math.PI/180)];
+// Chinese compass orientation: south above, north below (午 top, 子 bottom).
+const point=(radius,angle)=>[360+radius*Math.sin((angle+180)*Math.PI/180),360-radius*Math.cos((angle+180)*Math.PI/180)];
 const sector=(inner,outer,angle)=>{
   const a=point(outer,angle-15),b=point(outer,angle+15),c=point(inner,angle+15),d=point(inner,angle-15);
   return `M ${a} A ${outer} ${outer} 0 0 1 ${b} L ${c} A ${inner} ${inner} 0 0 0 ${d} Z`;
