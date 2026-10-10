@@ -16,27 +16,28 @@ const sector=(inner,outer,angle)=>{
 };
 const label=(radius,angle,text,size,color='#263b33',dy=0)=>{const [x,y]=point(radius,angle);return `<text x="${x}" y="${y+dy}" text-anchor="middle" dominant-baseline="middle" font-size="${size}" fill="${color}">${text}</text>`};
 const phaseDescriptions=['เริ่มต้นชีวิต','ชำระและเรียนรู้','เติบโต รับผิดชอบ','ตั้งหลัก สร้างตัว','รุ่งเรืองสูงสุด','กำลังเริ่มลดลง','อ่อนแรง ต้องพัก','สิ้นสุดระยะเดิม','เก็บงำพลัง','พลังเก่าขาดสิ้น','ก่อตัวในครรภ์','ฟูมฟักก่อนเกิด'];
-function arcLabel(radius,angle,text,size,color,id){
+function arcLabel(radius,angle,text,size,color,id,centered=false){
   const screenAngle=((angle+180)%360+360)%360;
   const reverse=screenAngle>90&&screenAngle<270;
+  if(centered)radius+=(reverse?1:-1)*size*.35;
   const start=point(radius,angle+(reverse?14:-14));
   const end=point(radius,angle+(reverse?-14:14));
   return `<defs><path id="${id}" d="M ${start} A ${radius} ${radius} 0 0 ${reverse?0:1} ${end}"/></defs><text text-anchor="middle" font-size="${size}" fill="${color}"><textPath href="#${id}" startOffset="50%">${text}</textPath></text>`;
 }
 function renderWheel(){
   const p=profiles[profile];
-  let html='<circle cx="360" cy="360" r="365" fill="#fbfaf6" stroke="#c9cdbb"/><circle cx="360" cy="360" r="309" fill="none" stroke="#d9ddcc"/>';
+  let html='<circle cx="360" cy="360" r="343" fill="#fbfaf6" stroke="#c9cdbb"/><circle cx="360" cy="360" r="309" fill="none" stroke="#d9ddcc"/>';
   html+='<g class="outer-ring" tabindex="0" role="slider" aria-label="ตำแหน่งวงฉางเซิง ใช้ลูกศรซ้ายหรือขวาหมุนทีละช่อง" aria-valuemin="0" aria-valuemax="11" aria-valuenow="'+offset+'" aria-valuetext="'+(practice?'โหมดท่องจำ':'長生 ตรงกับ '+branches[offset].han+' '+branches[offset].zodiac)+'">';
   for(let i=0;i<12;i++){
     const a=i*30+rotation,show=!practice||(revealed&&wrap(i+offset)===selected);
     html+=`<path d="${sector(201,296,a)}" fill="${highlightedPhases.has(i)&&!practice?phaseColors[profile]:'#f6f3e9'}" stroke="#d6d9c9" stroke-width="1"/>`;
-    html+=`<path class="meaning-sector" d="${sector(313,357,a)}" fill="#f5f2e9" stroke="#e3e3d8" stroke-width="1"/>`;
+    html+=`<path class="meaning-sector" d="${sector(313,335,a)}" fill="#f5f2e9" stroke="#e3e3d8" stroke-width="1"/>`;
     html+=arcLabel(270,a,show?phases[i].han:'?',30,i===0?p.color:'#34483b',`phase-han-${i}`);
     if(show){
       html+=arcLabel(235,a,phases[i].reading,21,'#65745f',`phase-thai-${i}`);
-      html+=arcLabel(338,a,phaseDescriptions[i],18,'#858a80',`meaning-${i}`);
+      html+=arcLabel(324,a,phaseDescriptions[i],16,'#969b92',`meaning-${i}`,true);
     }else{
-      html+=arcLabel(338,a,'· · ·',18,'#a2a79a',`meaning-${i}`);
+      html+=arcLabel(324,a,'· · ·',16,'#a9ada3',`meaning-${i}`,true);
     }
   }
   html+='</g>';
