@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f2e9">
+  <meta name="description" content="วงล้อ 12 กิ่งดินประจำเดือน กับสิบสองระยะฉางเซิง หมุนลงล็อกทีละช่อง สำหรับฝึกท่องจำปาจื้อ">
+  <title>วงล้อฉางเซิง · 12 กิ่งดิน</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <header><a class="brand" href="./"><span class="brand-icon">十二</span><span>วงล้อฉางเซิง<small>เครื่องมือท่องจำปาจื้อ</small></span></a><span class="edition">12 กิ่งดิน · 4 ฤดูกาล</span></header>
+  <main>
+    <div class="intro"><p class="eyebrow">十二長生 · สือเอ้อร์ฉางเซิง</p><h1>หมุนให้ตรง จำให้ขึ้นใจ</h1><p>กิ่งดินอยู่กับที่ · วงฉางเซิงหมุนลงล็อกทีละช่อง</p></div>
+    <section class="workspace" aria-label="วงล้อสำหรับท่องจำ">
+      <div class="wheel-area">
+        <div class="wheel-caption"><span class="dot"></span><span id="alignment">ตำแหน่งตามหลักไม้หยาง</span><span class="lock">หมุนทีละ 30°</span></div>
+        <svg id="wheel" viewBox="0 0 720 720" role="group" aria-label="วงล้อ 12 กิ่งดิน ลากวงนอกเพื่อหมุน หรือใช้ปุ่มหมุนด้านล่าง"></svg>
+        <div class="rotation-controls"><button id="prev" aria-label="หมุนวงนอกทวนเข็มหนึ่งช่อง">↶ <span>ย้อน 1 ช่อง</span></button><span id="step-status" aria-live="polite">ลงล็อกแล้ว</span><button id="next" aria-label="หมุนวงนอกตามเข็มหนึ่งช่อง"><span>ถัดไป 1 ช่อง</span> ↷</button></div>
+        <p class="gesture-hint">ลากวงนอกเพื่อหมุน · แตะกิ่งดินเพื่ออ่าน · ใช้ปุ่มลูกศรเมื่อโฟกัสวงนอก</p>
+        <div class="seasons"><span class="spring">ใบไม้ผลิ</span><span class="summer">ร้อน</span><span class="autumn">ใบไม้ร่วง</span><span class="winter">หนาว</span></div>
+      </div>
+      <aside>
+        <section class="panel"><p class="eyebrow">01 / เลือกธาตุอ้างอิง</p><h2>เริ่มจากก้านฟ้าหยาง</h2><div id="profiles" class="profile-grid" aria-label="เลือกธาตุ"></div><p class="muted">เลือกธาตุเพื่อจัดวงฉางเซิงเข้าตำแหน่งของก้านฟ้านั้น</p><button id="reset" class="reset">↺ กลับตำแหน่งของธาตุที่เลือก</button></section>
+        <section class="panel reading-panel"><p class="eyebrow">02 / อ่านคู่ที่ตรงกัน</p><div id="reading" aria-live="polite"></div></section>
+        <section class="practice-panel"><div><h2>ฝึกท่องจำ</h2><p>ซ่อนชื่อระยะ แล้วลองตอบด้วยตัวเอง</p></div><label class="switch"><input id="practice" type="checkbox" aria-label="เปิดโหมดท่องจำ"><span></span></label></section>
+      </aside>
+    </section>
+    <details id="reference" class="reference"><summary>ดูตารางครบ 12 ช่อง <span>กิ่งดิน ↔ ระยะที่ตรงกับวงปัจจุบัน</span></summary><div class="table-scroll"><table><thead><tr><th>กิ่งดิน / นักษัตร</th><th>ฤดู</th><th>ระยะฉางเซิง</th><th>ความหมาย</th></tr></thead><tbody id="table-body"></tbody></table></div></details>
+    <section class="note"><h2>อ่านวงล้อนี้อย่างไร</h2><p>วงในคือกิ่งดินประจำเดือน 12 ช่อง สีแสดงฤดูกาลตามระบบจีน วงนอกคือ 12 ระยะฉางเซิง เรียงตามเข็มสำหรับก้านฟ้าหยาง เมื่อหมุนเองจะเป็นตำแหน่งสำหรับฝึกจำ กด “กลับตำแหน่ง” เพื่อกลับไปดูตำแหน่งตามหลักของธาตุที่เลือก</p><p>ฤดูกาลอ้างอิงเดือนที่แบ่งด้วย節氣 (เจี๋ยชี่ / สารทสุริยะ) ตารางนี้ใช้ 甲 (เจี่ย ไม้หยาง), 丙 (ปิ่ง ไฟหยาง), 庚 (เกิง ทองหยาง), 壬 (เหริน น้ำหยาง) ก้านฟ้าหยินใช้ลำดับอีกชุด</p></section>
+  </main>
+  <footer><span>วงล้อเพื่อการเรียนรู้ · อักษรจีนตัวเต็ม / เสียงจีนกลาง</span><a href="https://zh.wikisource.org/zh-hant/三命通會/卷二" target="_blank" rel="noopener noreferrer">อ้างอิง《三命通會》卷二 ↗</a></footer>
+  <noscript><p>โปรดเปิด JavaScript เพื่อใช้งานวงล้อ</p></noscript>
+</body>
+</html>
