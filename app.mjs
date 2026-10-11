@@ -133,7 +133,7 @@ function spiralArcLabel(entry,offset,text,size,color,key){
   return `<defs><path id="${id}" d="${spiralTextPath(entry,offset,size)}"/></defs><text text-anchor="middle" font-size="${size}" fill="${color}"><textPath href="#${id}" startOffset="50%">${text}</textPath></text>`;
 }
 function renderSpiral(){
-  const entries=spiralYears(birthYear,currentYear,direction),visibleEntries=spiralSlice(entries,cycle),extent=visibleEntries.at(-1).radius+(cycle===null?46:83);
+  const entries=spiralYears(birthYear,currentYear,direction),visibleEntries=spiralSlice(entries,cycle),extent=visibleEntries.at(-1).radius+(cycle===null?46:67);
   const spiral=$('spiral');spiral.setAttribute('viewBox',`${-extent} ${-extent} ${extent*2} ${extent*2}`);
   let html='';
   html+='<g transform="translate(-360 -360)">';
@@ -162,7 +162,7 @@ function renderSpiral(){
       const from=spiralPoint(angle,170),to=spiralPoint(angle,244);
       html+=`<path class="cycle-boundary" d="M ${from} L ${to}" stroke="#fbfaf6" stroke-width="11"/><path d="M ${from} L ${to}" stroke="#5d7163" stroke-width="3" stroke-linecap="round"/>`;
     }
-    const marker=(entry,text)=>`<g class="cycle-marker" font-weight="300">${spiralArcLabel({...entry,radius:263,circular:true},0,text,15,'#899185','marker')}</g>`;
+    const marker=(entry,text)=>`<g class="cycle-marker" font-weight="300"><g transform="translate(-360 -360)"><path d="${sector(239,259,entry.angle*direction)}" fill="${colors[branches[entry.branch].key]}" stroke="#fbfaf6" stroke-width="1"/></g>${spiralArcLabel({...entry,radius:249,circular:true},0,text,15,'#74816f','marker')}</g>`;
     html+=marker(first,visibleEntries.length===1?'เริ่ม / ล่าสุด':`เริ่ม ${shortYear(first.year,era)}`);
     if(visibleEntries.length>1)html+=marker(last,`${visibleEntries.length===12?'จบ':'ล่าสุด'} ${shortYear(last.year,era)}`);
   }
