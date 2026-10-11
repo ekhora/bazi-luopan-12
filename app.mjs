@@ -223,3 +223,15 @@ function setDirection(value){
 }
 $('direction-cw').addEventListener('click',()=>setDirection(1));
 $('direction-ccw').addEventListener('click',()=>setDirection(-1));
+
+const settingsDialog=$('settings-dialog');
+$('settings-open').addEventListener('click',()=>{settingsDialog.showModal();document.body.classList.add('settings-active');});
+function closeSettings(){settingsDialog.close();}
+$('settings-close').addEventListener('click',closeSettings);
+$('settings-done').addEventListener('click',closeSettings);
+settingsDialog.addEventListener('close',()=>{document.body.classList.remove('settings-active');$('settings-open').focus({preventScroll:true});});
+settingsDialog.addEventListener('click',e=>{
+  if(e.target!==settingsDialog)return;
+  const box=settingsDialog.getBoundingClientRect();
+  if(e.clientX<box.left||e.clientX>box.right||e.clientY<box.top||e.clientY>box.bottom)closeSettings();
+});

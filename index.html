@@ -6,33 +6,24 @@
   <meta name="description" content="วงล้อ 12 กิ่งดินสำหรับมือถือ หมุนฉางเซิงตามนิ้วและลงล็อกเมื่อปล่อย สำหรับฝึกท่องจำปาจื้อ">
   <title>วงล้อฉางเซิง · 12 กิ่งดิน</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=26">
-  <script type="module" src="./app.mjs?v=26"></script>
+  <link rel="stylesheet" href="./style.css?v=27">
+  <script type="module" src="./app.mjs?v=27"></script>
 </head>
 <body>
-  <header><a class="brand" href="./"><span class="brand-icon">十二</span><h1>วงล้อฉางเซิง<small>12 กิ่งดิน · สือเอ้อร์ฉางเซิง</small></h1></a></header>
+  <header><a class="brand" href="./"><span class="brand-icon">十二</span><h1>วงล้อฉางเซิง<small>12 กิ่งดิน · สือเอ้อร์ฉางเซิง</small></h1></a><button id="settings-open" class="settings-button" aria-label="ตั้งค่า" aria-haspopup="dialog" title="ตั้งค่า">⚙</button></header>
   <main>
     <div class="mode-switch" aria-label="เลือกแบบวง"><button id="mode-phases" aria-pressed="true">12 วัฏจักร</button><button id="mode-years" aria-pressed="false">ปีและอายุ</button></div>
-    <div class="direction-switch" role="group" aria-label="ทิศทางลำดับบนวง"><button id="direction-cw" aria-pressed="true">↻ ตามเข็ม</button><button id="direction-ccw" aria-pressed="false">↺ ทวนเข็ม</button></div>
     <div id="phase-view">
     <section class="wheel-area" aria-label="วงล้อสำหรับท่องจำ">
       <div class="wheel-caption"><span class="dot"></span><span id="alignment">ไม้หยาง · ตำแหน่งตามหลัก</span></div>
       <svg id="wheel" viewBox="8 8 704 704" role="group" aria-label="วงล้อ 12 กิ่งดิน ลากวงนอกเพื่อหมุน ปล่อยเพื่อลงล็อก"></svg>
       <div class="seasons" aria-label="สีฤดูกาล"><span class="spring">ใบไม้ผลิ</span><span class="summer">ร้อน</span><span class="autumn">ใบไม้ร่วง</span><span class="winter">หนาว</span></div>
-      <div id="profiles" class="profile-grid" aria-label="เลือกก้านฟ้าหยาง"></div>
       <div class="rotation-controls"><button id="prev" aria-label="หมุนวงนอกทวนเข็มหนึ่งช่อง">↶ ย้อน</button><button id="reset" aria-label="กลับตำแหน่งของธาตุที่เลือก">↺ กลับตำแหน่ง</button><button id="next" aria-label="หมุนวงนอกตามเข็มหนึ่งช่อง">ถัดไป ↷</button></div>
       <p id="step-status" class="step-status" aria-live="polite">ลากเพื่อหมุน · ปล่อยเพื่อลงล็อก</p>
     </section>
-    <div class="practice-controls"><label class="switch"><input id="practice" type="checkbox" aria-label="เปิดโหมดท่องจำ"><span class="switch-track"></span><span>ท่องจำ</span></label><button id="reveal" hidden>เฉลยช่องที่เลือก</button></div>
+    <div class="practice-controls"><button id="reveal" hidden>เฉลยช่องที่เลือก</button></div>
     </div>
     <section id="years-view" hidden aria-label="ก้นหอยปีและอายุ">
-      <form id="birth-form" class="birth-controls">
-        <label for="birth-input">ปีเกิด <span id="birth-era">พ.ศ.</span></label>
-        <input id="birth-input" type="text" inputmode="numeric" maxlength="4" value="2522" required aria-describedby="birth-error">
-        <button type="submit">คำนวณ</button>
-        <div class="era-switch"><button type="button" id="era-be" aria-pressed="true">พ.ศ.</button><button type="button" id="era-ce" aria-pressed="false">ค.ศ.</button></div>
-      </form>
-      <p id="birth-error" role="alert" hidden></p>
       <label class="cycle-picker" for="cycle-select">เลือกรอบ <select id="cycle-select" aria-label="เลือกรอบปี"></select></label>
       <p id="year-caption" class="year-caption"></p>
       <p id="cycle-guide" class="cycle-guide"></p>
@@ -42,6 +33,28 @@
       <p class="year-note">ปี · ก้านฟ้า–กิ่งดิน · อายุย่าง<br>ปีเกิด = 1 · รอบละ 12 ปี</p>
     </section>
   </main>
+
+  <dialog id="settings-dialog" aria-labelledby="settings-title">
+    <div class="settings-heading"><h2 id="settings-title">ตั้งค่า</h2><button id="settings-close" aria-label="ปิดการตั้งค่า">×</button></div>
+    <section class="settings-section"><h3>ทิศทางของวง</h3>
+    <div class="direction-switch" role="group" aria-label="ทิศทางลำดับบนวง"><button id="direction-cw" aria-pressed="true">↻ ตามเข็ม</button><button id="direction-ccw" aria-pressed="false">↺ ทวนเข็ม</button></div>
+    </section>
+    <section class="settings-section"><h3>12 วัฏจักร · เลือกธาตุ</h3>
+      <div id="profiles" class="profile-grid" aria-label="เลือกก้านฟ้าหยาง"></div>
+      <div class="practice-controls"><label class="switch"><input id="practice" type="checkbox" aria-label="เปิดโหมดท่องจำ"><span class="switch-track"></span><span>ท่องจำ</span></label></div>
+    </section>
+    <section class="settings-section"><h3>ปีและอายุ</h3>
+      <form id="birth-form" class="birth-controls">
+        <label for="birth-input">ปีเกิด <span id="birth-era">พ.ศ.</span></label>
+        <input id="birth-input" type="text" inputmode="numeric" maxlength="4" value="2522" required aria-describedby="birth-error">
+        <button type="submit">คำนวณ</button>
+        <div class="era-switch"><button type="button" id="era-be" aria-pressed="true">พ.ศ.</button><button type="button" id="era-ce" aria-pressed="false">ค.ศ.</button></div>
+      </form>
+      <p id="birth-error" role="alert" hidden></p>
+
+    </section>
+    <button id="settings-done" class="settings-done">เสร็จแล้ว</button>
+  </dialog>
   <footer><span>ก้านฟ้าหยาง · เสียงจีนกลาง</span><a href="https://zh.wikisource.org/zh-hant/三命通會/卷二" target="_blank" rel="noopener noreferrer">แหล่งอ้างอิง ↗</a></footer>
   <noscript><p>โปรดเปิด JavaScript เพื่อใช้งานวงล้อ</p></noscript>
 </body>
