@@ -1,4 +1,4 @@
-import {BIRTH_YEAR,yearNow,displayYear,parseBirthYear,spiralYears,spiralPoint,spiralCell} from './spiral.mjs';
+import {BIRTH_YEAR,yearNow,displayYear,parseBirthYear,spiralYears,spiralPoint,spiralCell} from './spiral.mjs?v=13';
 import {branches,phases,profiles,wrap,snap,angleDelta} from './core.mjs';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
@@ -139,14 +139,14 @@ function renderSpiral(){
   for(const entry of entries){
     const active=cycle===null||entry.cycle===cycle,[x,y]=spiralPoint(entry.angle,entry.radius);
     const fill=entry.year===selectedYear?selectedColors[branches[entry.branch].key]:colors[branches[entry.branch].key];
-    html+=`<g class="year-cell" data-year="${entry.year}" tabindex="0" role="button" aria-label="${era==='BE'?'พ.ศ.':'ค.ศ.'} ${displayYear(entry.year,era)} ${branches[entry.branch].zodiac} อายุ ${entry.age} ปี" aria-pressed="${entry.year===selectedYear}" opacity="${active?1:.32}"><path d="${spiralCell(entry)}" fill="${fill}" stroke="#f5f2e9" stroke-width="2"/><text x="${x}" y="${y-6}" text-anchor="middle" font-size="29" fill="#263b33">${displayYear(entry.year,era)}</text><text x="${x}" y="${y+21}" text-anchor="middle" font-size="21" fill="#65745f">อายุ ${entry.age}</text></g>`;
+    html+=`<g class="year-cell" data-year="${entry.year}" tabindex="0" role="button" aria-label="${era==='BE'?'พ.ศ.':'ค.ศ.'} ${displayYear(entry.year,era)} ${branches[entry.branch].zodiac} อายุย่าง ${entry.age} ปี" aria-pressed="${entry.year===selectedYear}" opacity="${active?1:.32}"><path d="${spiralCell(entry)}" fill="${fill}" stroke="#f5f2e9" stroke-width="2"/><text x="${x}" y="${y-6}" text-anchor="middle" font-size="29" fill="#263b33">${displayYear(entry.year,era)}</text><text x="${x}" y="${y+21}" text-anchor="middle" font-size="21" fill="#65745f">อายุ ${entry.age}</text></g>`;
   }
   html+='<circle cx="0" cy="0" r="85" fill="#fbfaf6" stroke="#dedfd2"/><text x="0" y="-35" text-anchor="middle" font-size="18" fill="#727a6e">ปีเกิด · '+branches[zodiacIndexForBirth()].zodiac+'</text><text x="0" y="4" text-anchor="middle" font-size="36" fill="#497c61">'+displayYear(birthYear,era)+'</text><text x="0" y="36" text-anchor="middle" font-size="19" fill="#727a6e">'+(era==='BE'?'พ.ศ.':'ค.ศ.')+'</text>';
   spiral.innerHTML=html;
   const count=Math.ceil(entries.length/12),activeEntries=cycle===null?entries:entries.filter(e=>e.cycle===cycle);
   $('year-caption').textContent=(cycle===null?'ทุกรอบ':`รอบที่ ${cycle+1} / ${count}`)+` · ${displayYear(activeEntries[0].year,era)}–${displayYear(activeEntries.at(-1).year,era)}`;
   const chosen=entries.find(e=>e.year===selectedYear);
-  $('year-selection').textContent=`${era==='BE'?'พ.ศ.':'ค.ศ.'} ${displayYear(chosen.year,era)} · ${branches[chosen.branch].han} ${branches[chosen.branch].zodiac} · อายุ ${chosen.age} ปี`;
+  $('year-selection').textContent=`${era==='BE'?'พ.ศ.':'ค.ศ.'} ${displayYear(chosen.year,era)} · ${branches[chosen.branch].han} ${branches[chosen.branch].zodiac} · อายุย่าง ${chosen.age} ปี`;
   $('cycle-prev').disabled=cycle===0; $('cycle-next').disabled=cycle===count-1;
   $('cycle-all').textContent=cycle===null?'กลับรอบแรก':'ดูทุกรอบ';
   $('zoom-out').disabled=zoom<=1;$('zoom-in').disabled=zoom>=3;
