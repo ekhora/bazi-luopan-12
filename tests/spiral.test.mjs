@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {spiralYears,zodiacIndex,displayYear,parseBirthYear,yearNow,spiralCell,yearGanzhi,spiralTextPath,shortYear,spiralSlice} from '../spiral.mjs';
+import {spiralYears,zodiacIndex,displayYear,parseBirthYear,yearNow,spiralCell,yearGanzhi,spiralTextPath,shortYear,spiralSlice,spiralPoint} from '../spiral.mjs';
 test('เกิดมะแม 2522: 48 ปีตั้งแต่อายุย่าง 1 ถึง 48 ในปี 2026',()=>{
   const entries=spiralYears(1979,2026);
   assert.equal(entries.length,48);assert.equal(entries[0].branch,7);assert.equal(entries[0].age,1);assert.equal(entries[47].age,48);assert.equal(entries[47].year,2026);
@@ -36,4 +36,15 @@ test('ดูทีละรอบแสดงเฉพาะปีของร�
   assert.equal(second[0].age,13);assert.ok(second.every(entry=>entry.radius===205&&entry.circular));assert.equal(second[0].ganzhi,'辛未');
   assert.equal(spiralSlice(entries,null).length,48);assert.equal(entries[12].radius,283);
   const partial=spiralSlice(spiralYears(2000,2026),2);assert.equal(partial.length,3);assert.equal(partial[0].year,2024);assert.equal(partial.at(-1).year,2026);
+});
+
+test('สลับตามเข็มและทวนเข็มสะท้อนวงโดยคงปี อายุ และกิ่งดินเดิม',()=>{
+  const cw=spiralYears(1979,2026,1),ccw=spiralYears(1979,2026,-1);
+  for(let i=0;i<cw.length;i++){
+    assert.equal(cw[i].year,ccw[i].year);assert.equal(cw[i].age,ccw[i].age);assert.equal(cw[i].branch,ccw[i].branch);assert.equal(cw[i].ganzhi,ccw[i].ganzhi);
+    const a=spiralPoint(cw[i].angle,cw[i].radius),b=spiralPoint(ccw[i].angle,ccw[i].radius);
+    assert.ok(Math.abs(a[0]+b[0])<1e-9);assert.ok(Math.abs(a[1]-b[1])<1e-9);
+    assert.doesNotMatch(spiralCell(ccw[i]),/NaN|Infinity/);assert.doesNotMatch(spiralTextPath(ccw[i],0,24),/NaN|Infinity/);
+  }
+  assert.equal(ccw[1].angle-ccw[0].angle,-30);assert.throws(()=>spiralYears(1979,2026,0));
 });

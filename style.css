@@ -12,3 +12,5 @@
 .cycle-picker{display:flex;align-items:center;gap:8px;margin:14px 6px 0;font-size:12px}.cycle-picker select{flex:1;min-width:0;min-height:44px;font:inherit;color:var(--ink);background:#fbfaf6;border:1px solid var(--line);border-radius:10px;padding:8px}
 
 .cycle-guide{margin:0 0 6px;text-align:center;font-size:11px;color:#65745f}.cycle-guide:empty{display:none}
+
+.direction-switch{display:flex;gap:4px;background:#e8e9de;padding:4px;border-radius:12px;margin:0 6px 14px}.direction-switch button{flex:1;border:0;border-radius:9px;background:transparent;font-size:12px;padding:7px 10px}.direction-switch button[aria-pressed="true"]{background:#fbfaf6;color:#497c61;box-shadow:0 1px 3px #263b3310}

@@ -13,20 +13,21 @@ export function parseBirthYear(value,era,currentYear){
   if(year<1800||year>currentYear)throw new Error(`ปีเกิดต้องอยู่ระหว่าง ${displayYear(1800,era)}–${displayYear(currentYear,era)}`);
   return year;
 }
-export function spiralYears(birthYear,currentYear){
+export function spiralYears(birthYear,currentYear,direction=1){
+  if(direction!==1&&direction!==-1)throw new Error('ทิศทางไม่ถูกต้อง');
   if(!Number.isInteger(birthYear)||!Number.isInteger(currentYear)||birthYear>currentYear||birthYear<1800)throw new Error('ช่วงปีไม่ถูกต้อง');
-  return Array.from({length:currentYear-birthYear+1},(_,elapsed)=>({year:birthYear+elapsed,age:elapsed+1,ganzhi:yearGanzhi(birthYear+elapsed),cycle:Math.floor(elapsed/12),branch:zodiacIndex(birthYear+elapsed),angle:(zodiacIndex(birthYear)+elapsed)*30,radius:205+elapsed*6.5}));
+  return Array.from({length:currentYear-birthYear+1},(_,elapsed)=>({year:birthYear+elapsed,age:elapsed+1,ganzhi:yearGanzhi(birthYear+elapsed),cycle:Math.floor(elapsed/12),branch:zodiacIndex(birthYear+elapsed),direction,angle:direction*(zodiacIndex(birthYear)+elapsed)*30,radius:205+elapsed*6.5}));
 }
 export const spiralPoint=(angle,radius)=>[radius*Math.sin((angle+180)*Math.PI/180),-radius*Math.cos((angle+180)*Math.PI/180)];
 export function spiralCell(entry){
   const points=[];
   for(let step=0;step<=8;step++){
     const delta=-.47+step*.94/8;
-    points.push(spiralPoint(entry.angle+delta*30,entry.radius+delta*(entry.circular?0:6.5)+32));
+    points.push(spiralPoint(entry.angle+delta*30,entry.radius+delta*(entry.circular?0:6.5)*(entry.direction??1)+32));
   }
   for(let step=8;step>=0;step--){
     const delta=-.47+step*.94/8;
-    points.push(spiralPoint(entry.angle+delta*30,entry.radius+delta*(entry.circular?0:6.5)-32));
+    points.push(spiralPoint(entry.angle+delta*30,entry.radius+delta*(entry.circular?0:6.5)*(entry.direction??1)-32));
   }
   return 'M '+points.map(point=>point.join(',')).join(' L ')+' Z';
 }
