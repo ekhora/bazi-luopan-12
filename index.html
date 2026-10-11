@@ -6,12 +6,14 @@
   <meta name="description" content="วงล้อ 12 กิ่งดินสำหรับมือถือ หมุนฉางเซิงตามนิ้วและลงล็อกเมื่อปล่อย สำหรับฝึกท่องจำปาจื้อ">
   <title>วงล้อฉางเซิง · 12 กิ่งดิน</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=11">
-  <script type="module" src="./app.mjs?v=11"></script>
+  <link rel="stylesheet" href="./style.css?v=12">
+  <script type="module" src="./app.mjs?v=12"></script>
 </head>
 <body>
   <header><a class="brand" href="./"><span class="brand-icon">十二</span><h1>วงล้อฉางเซิง<small>12 กิ่งดิน · สือเอ้อร์ฉางเซิง</small></h1></a></header>
   <main>
+    <div class="mode-switch" aria-label="เลือกแบบวง"><button id="mode-phases" aria-pressed="true">12 วัฏจักร</button><button id="mode-years" aria-pressed="false">ปีและอายุ</button></div>
+    <div id="phase-view">
     <section class="wheel-area" aria-label="วงล้อสำหรับท่องจำ">
       <div class="wheel-caption"><span class="dot"></span><span id="alignment">ไม้หยาง · ตำแหน่งตามหลัก</span></div>
       <svg id="wheel" viewBox="8 8 704 704" role="group" aria-label="วงล้อ 12 กิ่งดิน ลากวงนอกเพื่อหมุน ปล่อยเพื่อลงล็อก"></svg>
@@ -21,6 +23,22 @@
       <p id="step-status" class="step-status" aria-live="polite">ลากเพื่อหมุน · ปล่อยเพื่อลงล็อก</p>
     </section>
     <div class="practice-controls"><label class="switch"><input id="practice" type="checkbox" aria-label="เปิดโหมดท่องจำ"><span class="switch-track"></span><span>ท่องจำ</span></label><button id="reveal" hidden>เฉลยช่องที่เลือก</button></div>
+    </div>
+    <section id="years-view" hidden aria-label="ก้นหอยปีและอายุ">
+      <form id="birth-form" class="birth-controls">
+        <label for="birth-input">ปีเกิด <span id="birth-era">พ.ศ.</span></label>
+        <input id="birth-input" type="text" inputmode="numeric" maxlength="4" value="2522" required aria-describedby="birth-error">
+        <button type="submit">คำนวณ</button>
+        <div class="era-switch"><button type="button" id="era-be" aria-pressed="true">พ.ศ.</button><button type="button" id="era-ce" aria-pressed="false">ค.ศ.</button></div>
+      </form>
+      <p id="birth-error" role="alert" hidden></p>
+      <p id="year-caption" class="year-caption"></p>
+      <div class="spiral-viewport"><svg id="spiral" role="group" aria-label="ก้นหอยปีและอายุ คลิกปีเพื่อเลือก"></svg></div>
+      <p id="year-selection" class="year-selection" aria-live="polite"></p>
+      <div class="cycle-controls"><button id="cycle-prev">↶ รอบก่อน</button><button id="cycle-all">ดูทุกรอบ</button><button id="cycle-next">รอบถัดไป ↷</button></div>
+      <div class="zoom-controls"><button id="zoom-out" aria-label="ย่อก้นหอย">−</button><button id="zoom-fit">พอดีจอ</button><button id="zoom-in" aria-label="ขยายก้นหอย">＋</button></div>
+      <p class="year-note">อายุตามปี · ปีเกิด = 0 · รอบละ 12 ปี</p>
+    </section>
   </main>
   <footer><span>ก้านฟ้าหยาง · เสียงจีนกลาง</span><a href="https://zh.wikisource.org/zh-hant/三命通會/卷二" target="_blank" rel="noopener noreferrer">แหล่งอ้างอิง ↗</a></footer>
   <noscript><p>โปรดเปิด JavaScript เพื่อใช้งานวงล้อ</p></noscript>

@@ -1,6 +1,9 @@
+import {BIRTH_YEAR,yearNow,displayYear,parseBirthYear,spiralYears,spiralPoint,spiralCell} from './spiral.mjs';
 import {branches,phases,profiles,wrap,snap,angleDelta} from './core.mjs';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
+let mode='phases',birthYear=BIRTH_YEAR,era='BE',cycle=0,selectedYear=birthYear,zoom=1;
+const currentYear=yearNow(new Date());
 let profile='wood', offset=profiles.wood.start, selected=0, practice=false, revealed=false, drag=null, selectedPhase=null;
 let rotation=offset*30, destination=rotation, motionFrame=0, dragFrame=0;
 const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -123,3 +126,56 @@ function stopDrag(e){
 }
 svg.addEventListener('pointerup',stopDrag);svg.addEventListener('pointercancel',stopDrag);svg.addEventListener('lostpointercapture',stopDrag);
 renderWheel();renderControls();
+
+function renderSpiral(){
+  const entries=spiralYears(birthYear,currentYear),extent=entries.at(-1).radius+46;
+  const spiral=$('spiral');spiral.setAttribute('viewBox',`${-extent} ${-extent} ${extent*2} ${extent*2}`);
+  spiral.style.width=`${zoom*100}%`;
+  let html='';
+  for(let i=0;i<12;i++){
+    const b=branches[i],[x,y]=spiralPoint(i*30,132);
+    html+=`<circle cx="${x}" cy="${y}" r="27" fill="${colors[b.key]}"/><text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="37" fill="#2e463c">${b.han}</text>`;
+  }
+  for(const entry of entries){
+    const active=cycle===null||entry.cycle===cycle,[x,y]=spiralPoint(entry.angle,entry.radius);
+    const fill=entry.year===selectedYear?selectedColors[branches[entry.branch].key]:colors[branches[entry.branch].key];
+    html+=`<g class="year-cell" data-year="${entry.year}" tabindex="0" role="button" aria-label="${era==='BE'?'พ.ศ.':'ค.ศ.'} ${displayYear(entry.year,era)} ${branches[entry.branch].zodiac} อายุ ${entry.age} ปี" aria-pressed="${entry.year===selectedYear}" opacity="${active?1:.32}"><path d="${spiralCell(entry)}" fill="${fill}" stroke="#f5f2e9" stroke-width="2"/><text x="${x}" y="${y-6}" text-anchor="middle" font-size="29" fill="#263b33">${displayYear(entry.year,era)}</text><text x="${x}" y="${y+21}" text-anchor="middle" font-size="21" fill="#65745f">อายุ ${entry.age}</text></g>`;
+  }
+  html+='<circle cx="0" cy="0" r="85" fill="#fbfaf6" stroke="#dedfd2"/><text x="0" y="-35" text-anchor="middle" font-size="18" fill="#727a6e">ปีเกิด · '+branches[zodiacIndexForBirth()].zodiac+'</text><text x="0" y="4" text-anchor="middle" font-size="36" fill="#497c61">'+displayYear(birthYear,era)+'</text><text x="0" y="36" text-anchor="middle" font-size="19" fill="#727a6e">'+(era==='BE'?'พ.ศ.':'ค.ศ.')+'</text>';
+  spiral.innerHTML=html;
+  const count=Math.ceil(entries.length/12),activeEntries=cycle===null?entries:entries.filter(e=>e.cycle===cycle);
+  $('year-caption').textContent=(cycle===null?'ทุกรอบ':`รอบที่ ${cycle+1} / ${count}`)+` · ${displayYear(activeEntries[0].year,era)}–${displayYear(activeEntries.at(-1).year,era)}`;
+  const chosen=entries.find(e=>e.year===selectedYear);
+  $('year-selection').textContent=`${era==='BE'?'พ.ศ.':'ค.ศ.'} ${displayYear(chosen.year,era)} · ${branches[chosen.branch].han} ${branches[chosen.branch].zodiac} · อายุ ${chosen.age} ปี`;
+  $('cycle-prev').disabled=cycle===0; $('cycle-next').disabled=cycle===count-1;
+  $('cycle-all').textContent=cycle===null?'กลับรอบแรก':'ดูทุกรอบ';
+  $('zoom-out').disabled=zoom<=1;$('zoom-in').disabled=zoom>=3;
+}
+function zodiacIndexForBirth(){return spiralYears(birthYear,birthYear)[0].branch;}
+function setMode(value){
+  if(drag){const pointer=drag.id;drag=null;svg.classList.remove('dragging');if(svg.hasPointerCapture(pointer))svg.releasePointerCapture(pointer);}
+  cancelMotion();rotation=destination=offset*30;mode=value;
+  $('phase-view').hidden=mode!=='phases';$('years-view').hidden=mode!=='years';
+  $('mode-phases').setAttribute('aria-pressed',String(mode==='phases'));$('mode-years').setAttribute('aria-pressed',String(mode==='years'));
+  if(mode==='years')renderSpiral();else{renderWheel();renderControls();}
+}
+function setEra(value){
+  era=value;$('birth-input').value=displayYear(birthYear,era);$('birth-era').textContent=era==='BE'?'พ.ศ.':'ค.ศ.';
+  $('era-be').setAttribute('aria-pressed',String(era==='BE'));$('era-ce').setAttribute('aria-pressed',String(era==='CE'));$('birth-error').hidden=true;renderSpiral();
+}
+function selectYear(year){selectedYear=year;if(cycle!==null)cycle=Math.floor((year-birthYear)/12);renderSpiral();$('spiral').querySelector(`[data-year="${year}"]`)?.focus({preventScroll:true});}
+$('mode-phases').addEventListener('click',()=>setMode('phases'));
+$('mode-years').addEventListener('click',()=>setMode('years'));
+$('era-be').addEventListener('click',()=>setEra('BE'));$('era-ce').addEventListener('click',()=>setEra('CE'));
+$('birth-form').addEventListener('submit',e=>{
+  e.preventDefault();try{birthYear=parseBirthYear($('birth-input').value.trim(),era,currentYear);selectedYear=birthYear;cycle=0;zoom=1;$('birth-error').hidden=true;renderSpiral();}catch(error){$('birth-error').textContent=error.message;$('birth-error').hidden=false;}
+});
+$('spiral').addEventListener('click',e=>{const cell=e.target.closest('[data-year]');if(cell)selectYear(Number(cell.dataset.year));});
+$('spiral').addEventListener('keydown',e=>{const cell=e.target.closest('[data-year]');if(cell&&(e.key==='Enter'||e.key===' ')){e.preventDefault();selectYear(Number(cell.dataset.year));}});
+function stepCycle(delta){
+  const last=Math.floor((currentYear-birthYear)/12);cycle=cycle===null?(delta<0?last:0):Math.max(0,Math.min(last,cycle+delta));selectedYear=birthYear+cycle*12;renderSpiral();
+}
+$('cycle-prev').addEventListener('click',()=>stepCycle(-1));$('cycle-next').addEventListener('click',()=>stepCycle(1));
+$('cycle-all').addEventListener('click',()=>{cycle=cycle===null?0:null;renderSpiral();});
+function setZoom(value){zoom=Math.max(1,Math.min(3,value));renderSpiral();}
+$('zoom-in').addEventListener('click',()=>setZoom(zoom+.5));$('zoom-out').addEventListener('click',()=>setZoom(zoom-.5));$('zoom-fit').addEventListener('click',()=>{setZoom(1);const viewport=$('spiral').parentElement;viewport.scrollTop=viewport.scrollLeft=0;});
