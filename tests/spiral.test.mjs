@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {spiralYears,zodiacIndex,displayYear,parseBirthYear,yearNow,spiralCell} from '../spiral.mjs';
+import {spiralYears,zodiacIndex,displayYear,parseBirthYear,yearNow,spiralCell,yearGanzhi,spiralTextPath} from '../spiral.mjs';
 test('เกิดมะแม 2522: 48 ปีตั้งแต่อายุย่าง 1 ถึง 48 ในปี 2026',()=>{
   const entries=spiralYears(1979,2026);
   assert.equal(entries.length,48);assert.equal(entries[0].branch,7);assert.equal(entries[0].age,1);assert.equal(entries[47].age,48);assert.equal(entries[47].year,2026);
@@ -21,4 +21,11 @@ test('ก้นหอยแยกปีนักษัตรเดียวก�
 });
 test('ปีปัจจุบันยึดเวลาไทยเมื่อข้ามปี',()=>{
   assert.equal(yearNow(new Date('2026-12-31T18:00:00Z')),2027);
+});
+
+test('ก้านฟ้ากิ่งดินปีตรงกับปฏิทินฮ่องกงและวนครบ 60 ปี',()=>{
+  assert.equal(yearGanzhi(1979),'己未');assert.equal(yearGanzhi(2026),'丙午');assert.equal(yearGanzhi(1984),'甲子');
+  for(let year=1800;year<=2026;year++)assert.equal(yearGanzhi(year),yearGanzhi(year+60));
+  const entries=spiralYears(1979,2026);assert.equal(entries[0].ganzhi,'己未');assert.equal(entries.at(-1).ganzhi,'丙午');
+  for(const entry of entries)for(const offset of [-20,0,20])assert.doesNotMatch(spiralTextPath(entry,offset,22),/NaN|Infinity/);
 });
