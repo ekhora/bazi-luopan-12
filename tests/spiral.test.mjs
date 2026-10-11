@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {spiralYears,zodiacIndex,displayYear,parseBirthYear,yearNow,spiralCell,yearGanzhi,spiralTextPath} from '../spiral.mjs';
+import {spiralYears,zodiacIndex,displayYear,parseBirthYear,yearNow,spiralCell,yearGanzhi,spiralTextPath,shortYear} from '../spiral.mjs';
 test('เกิดมะแม 2522: 48 ปีตั้งแต่อายุย่าง 1 ถึง 48 ในปี 2026',()=>{
   const entries=spiralYears(1979,2026);
   assert.equal(entries.length,48);assert.equal(entries[0].branch,7);assert.equal(entries[0].age,1);assert.equal(entries[47].age,48);assert.equal(entries[47].year,2026);
@@ -9,7 +9,7 @@ test('เกิดมะแม 2522: 48 ปีตั้งแต่อายุ�
 });
 test('สลับ พ.ศ. ค.ศ. และเปลี่ยนปีเกิด',()=>{
   assert.equal(parseBirthYear('2522','BE',2026),1979);assert.equal(parseBirthYear('1979','CE',2026),1979);
-  assert.equal(displayYear(2026,'BE'),2569);assert.equal(zodiacIndex(1980),8);assert.equal(zodiacIndex(2026),6);
+  assert.equal(displayYear(2026,'BE'),2569);assert.equal(shortYear(1979,'BE'),'22');assert.equal(shortYear(1979,'CE'),'79');assert.equal(shortYear(2000,'CE'),'00');assert.equal(zodiacIndex(1980),8);assert.equal(zodiacIndex(2026),6);
   const entries=spiralYears(2000,2026);assert.equal(entries.length,27);assert.equal(entries[0].branch,4);assert.equal(entries[26].cycle,2);
   assert.equal(spiralYears(2026,2026).length,1);assert.equal(spiralYears(2026,2026)[0].age,1);
   assert.throws(()=>parseBirthYear('2570','BE',2026));assert.throws(()=>parseBirthYear('abc','BE',2026));

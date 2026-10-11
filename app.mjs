@@ -1,8 +1,9 @@
-import {BIRTH_YEAR,yearNow,displayYear,parseBirthYear,spiralYears,spiralPoint,spiralCell,spiralTextPath} from './spiral.mjs?v=15';
+import {clampView,zoomAround,pinchView} from './viewport.mjs?v=17';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthYear,spiralYears,spiralPoint,spiralCell,spiralTextPath} from './spiral.mjs?v=17';
 import {branches,phases,profiles,wrap,snap,angleDelta} from './core.mjs';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
-let mode='phases',birthYear=BIRTH_YEAR,era='BE',cycle=0,selectedYear=birthYear,zoom=1;
+let mode='phases',birthYear=BIRTH_YEAR,era='BE',cycle=0,selectedYear=birthYear,zoom=1,panX=0,panY=0;
 const currentYear=yearNow(new Date());
 let profile='wood', offset=profiles.wood.start, selected=0, practice=false, revealed=false, drag=null, selectedPhase=null;
 let rotation=offset*30, destination=rotation, motionFrame=0, dragFrame=0;
@@ -134,7 +135,7 @@ function spiralArcLabel(entry,offset,text,size,color,key){
 function renderSpiral(){
   const entries=spiralYears(birthYear,currentYear),extent=entries.at(-1).radius+46;
   const spiral=$('spiral');spiral.setAttribute('viewBox',`${-extent} ${-extent} ${extent*2} ${extent*2}`);
-  spiral.style.width=`${zoom*100}%`;
+  applySpiralView();
   let html='';
   html+='<g transform="translate(-360 -360)">';
   for(let i=0;i<12;i++){
@@ -146,7 +147,7 @@ function renderSpiral(){
   for(const entry of entries){
     const active=cycle===null||entry.cycle===cycle;
     const fill=entry.year===selectedYear?selectedColors[branches[entry.branch].key]:colors[branches[entry.branch].key];
-    html+=`<g class="year-cell" data-year="${entry.year}" tabindex="0" role="button" aria-label="${era==='BE'?'พ.ศ.':'ค.ศ.'} ${displayYear(entry.year,era)} ${entry.ganzhi} ${branches[entry.branch].zodiac} อายุย่าง ${entry.age} ปี" aria-pressed="${entry.year===selectedYear}" opacity="${active?1:.32}"><path d="${spiralCell(entry)}" fill="${fill}" stroke="#f5f2e9" stroke-width="2"/>${spiralArcLabel(entry,0,`${displayYear(entry.year,era)} ${entry.ganzhi} ${entry.age}`,Math.min(24,entry.radius*.44/(5.1+String(entry.age).length*.6)),'#263b33','line')}</g>`;
+    html+=`<g class="year-cell" data-year="${entry.year}" tabindex="0" role="button" aria-label="${era==='BE'?'พ.ศ.':'ค.ศ.'} ${displayYear(entry.year,era)} ${entry.ganzhi} ${branches[entry.branch].zodiac} อายุย่าง ${entry.age} ปี" aria-pressed="${entry.year===selectedYear}" opacity="${active?1:.32}"><path d="${spiralCell(entry)}" fill="${fill}" stroke="#f5f2e9" stroke-width="2"/>${spiralArcLabel(entry,0,`${shortYear(entry.year,era)} ${entry.ganzhi} ${entry.age}`,Math.min(24,entry.radius*.44/(3.9+String(entry.age).length*.6)),'#263b33','line')}</g>`;
   }
   html+='<circle cx="0" cy="0" r="85" fill="#fbfaf6" stroke="#dedfd2"/><text x="0" y="-35" text-anchor="middle" font-size="18" fill="#727a6e">ปีเกิด · '+branches[zodiacIndexForBirth()].zodiac+'</text><text x="0" y="4" text-anchor="middle" font-size="36" fill="#497c61">'+displayYear(birthYear,era)+'</text><text x="0" y="36" text-anchor="middle" font-size="19" fill="#727a6e">'+(era==='BE'?'พ.ศ.':'ค.ศ.')+'</text>';
   spiral.innerHTML=html;
@@ -175,14 +176,70 @@ $('mode-phases').addEventListener('click',()=>setMode('phases'));
 $('mode-years').addEventListener('click',()=>setMode('years'));
 $('era-be').addEventListener('click',()=>setEra('BE'));$('era-ce').addEventListener('click',()=>setEra('CE'));
 $('birth-form').addEventListener('submit',e=>{
-  e.preventDefault();try{birthYear=parseBirthYear($('birth-input').value.trim(),era,currentYear);selectedYear=birthYear;cycle=0;zoom=1;$('birth-error').hidden=true;renderSpiral();}catch(error){$('birth-error').textContent=error.message;$('birth-error').hidden=false;}
+  e.preventDefault();try{birthYear=parseBirthYear($('birth-input').value.trim(),era,currentYear);selectedYear=birthYear;cycle=0;zoom=1,panX=0,panY=0;$('birth-error').hidden=true;renderSpiral();}catch(error){$('birth-error').textContent=error.message;$('birth-error').hidden=false;}
 });
-$('spiral').addEventListener('click',e=>{const cell=e.target.closest('[data-year]');if(cell)selectYear(Number(cell.dataset.year));});
+$('spiral').addEventListener('click',e=>{if(e.detail!==0)return;const cell=e.target.closest('[data-year]');if(cell)selectYear(Number(cell.dataset.year));});
 $('spiral').addEventListener('keydown',e=>{const cell=e.target.closest('[data-year]');if(cell&&(e.key==='Enter'||e.key===' ')){e.preventDefault();selectYear(Number(cell.dataset.year));}});
 function stepCycle(delta){
   const last=Math.floor((currentYear-birthYear)/12);cycle=cycle===null?(delta<0?last:0):Math.max(0,Math.min(last,cycle+delta));selectedYear=birthYear+cycle*12;renderSpiral();
 }
 $('cycle-prev').addEventListener('click',()=>stepCycle(-1));$('cycle-next').addEventListener('click',()=>stepCycle(1));
 $('cycle-all').addEventListener('click',()=>{cycle=cycle===null?0:null;renderSpiral();});
-function setZoom(value){zoom=Math.max(1,Math.min(3,value));renderSpiral();}
-$('zoom-in').addEventListener('click',()=>setZoom(zoom+.5));$('zoom-out').addEventListener('click',()=>setZoom(zoom-.5));$('zoom-fit').addEventListener('click',()=>{setZoom(1);const viewport=$('spiral').parentElement;viewport.scrollTop=viewport.scrollLeft=0;});
+const spiralViewport=$('spiral').parentElement;
+const spiralPointers=new Map();
+let spiralMoved=false,spiralTapYear=null,spiralViewFrame=0;
+function applySpiralView(){
+  if(!spiralViewport.clientWidth)return;
+  const view=clampView({zoom,x:panX,y:panY},spiralViewport.clientWidth);
+  zoom=view.zoom;panX=view.x;panY=view.y;
+  $('spiral').style.transform=`translate(${panX}px,${panY}px) scale(${zoom})`;
+  $('zoom-out').disabled=zoom<=1;$('zoom-in').disabled=zoom>=3;
+}
+function queueSpiralView(){
+  if(spiralViewFrame)return;
+  spiralViewFrame=requestAnimationFrame(()=>{spiralViewFrame=0;applySpiralView();});
+}
+function setZoom(value){
+  const view=zoomAround({zoom,x:panX,y:panY},value,{x:0,y:0},spiralViewport.clientWidth);
+  zoom=view.zoom;panX=view.x;panY=view.y;applySpiralView();
+}
+$('zoom-in').addEventListener('click',()=>setZoom(zoom+.5));
+$('zoom-out').addEventListener('click',()=>setZoom(zoom-.5));
+$('zoom-fit').addEventListener('click',()=>{zoom=1;panX=panY=0;applySpiralView();});
+spiralViewport.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  if(spiralPointers.size>=2)return;
+  e.preventDefault();
+  if(spiralPointers.size===0){spiralMoved=false;spiralTapYear=e.target.closest('[data-year]')?.dataset.year;}
+  else spiralMoved=true;
+  const box=spiralViewport.getBoundingClientRect();
+  const position={x:e.clientX-box.left-box.width/2,y:e.clientY-box.top-box.height/2};
+  spiralPointers.set(e.pointerId,{...position,startX:position.x,startY:position.y});
+  spiralViewport.setPointerCapture(e.pointerId);
+  spiralViewport.classList.add('panning');
+});
+spiralViewport.addEventListener('pointermove',e=>{
+  const previous=spiralPointers.get(e.pointerId);if(!previous)return;
+  e.preventDefault();
+  const before=[...spiralPointers.values()];
+  const box=spiralViewport.getBoundingClientRect();
+  const next={...previous,x:e.clientX-box.left-box.width/2,y:e.clientY-box.top-box.height/2};
+  if(Math.hypot(next.x-next.startX,next.y-next.startY)>6)spiralMoved=true;
+  spiralPointers.set(e.pointerId,next);
+  let view={zoom,x:panX,y:panY};
+  if(spiralPointers.size===2){spiralMoved=true;view=pinchView(view,before,[...spiralPointers.values()],box.width);}
+  else if(spiralMoved)view=clampView({...view,x:panX+next.x-previous.x,y:panY+next.y-previous.y},box.width);
+  zoom=view.zoom;panX=view.x;panY=view.y;queueSpiralView();
+});
+function endSpiralPointer(e){
+  if(!spiralPointers.has(e.pointerId))return;
+  const tap=e.type==='pointerup'&&!spiralMoved&&spiralPointers.size===1&&spiralTapYear!==undefined;
+  spiralPointers.delete(e.pointerId);
+  if(spiralViewport.hasPointerCapture(e.pointerId))spiralViewport.releasePointerCapture(e.pointerId);
+  if(spiralPointers.size===0)spiralViewport.classList.remove('panning');
+  if(tap)selectYear(Number(spiralTapYear));
+}
+spiralViewport.addEventListener('pointerup',endSpiralPointer);
+spiralViewport.addEventListener('pointercancel',endSpiralPointer);
+spiralViewport.addEventListener('lostpointercapture',endSpiralPointer);
+window.addEventListener('resize',applySpiralView);

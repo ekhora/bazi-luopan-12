@@ -6,6 +6,7 @@ export const BIRTH_YEAR = 1979;
 export const yearNow = date => Number(new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Bangkok',year:'numeric'}).format(date));
 export const zodiacIndex = year => ((year-1979+7)%12+12)%12;
 export const displayYear = (year,era='BE') => year+(era==='BE'?543:0);
+export const shortYear=(year,era='BE')=>String(displayYear(year,era)).slice(-2);
 export function parseBirthYear(value,era,currentYear){
   if(!/^\d{4}$/.test(String(value)))throw new Error('กรอกปีเกิดเป็นเลข 4 หลัก');
   const year=Number(value)-(era==='BE'?543:0);
