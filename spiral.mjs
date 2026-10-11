@@ -22,11 +22,11 @@ export function spiralCell(entry){
   const points=[];
   for(let step=0;step<=8;step++){
     const delta=-.47+step*.94/8;
-    points.push(spiralPoint(entry.angle+delta*30,entry.radius+delta*6.5+32));
+    points.push(spiralPoint(entry.angle+delta*30,entry.radius+delta*(entry.circular?0:6.5)+32));
   }
   for(let step=8;step>=0;step--){
     const delta=-.47+step*.94/8;
-    points.push(spiralPoint(entry.angle+delta*30,entry.radius+delta*6.5-32));
+    points.push(spiralPoint(entry.angle+delta*30,entry.radius+delta*(entry.circular?0:6.5)-32));
   }
   return 'M '+points.map(point=>point.join(',')).join(' L ')+' Z';
 }
@@ -42,5 +42,5 @@ export function spiralTextPath(entry,offset,size){
 
 export function spiralSlice(entries,cycle){
   if(cycle===null)return entries;
-  return entries.filter(entry=>entry.cycle===cycle).map((entry,index)=>({...entry,radius:205+index*6.5}));
+  return entries.filter(entry=>entry.cycle===cycle).map(entry=>({...entry,radius:205,circular:true}));
 }

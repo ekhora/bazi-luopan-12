@@ -33,7 +33,7 @@ test('ก้านฟ้ากิ่งดินปีตรงกับปฏ�
 test('ดูทีละรอบแสดงเฉพาะปีของรอบที่เลือกและจัดวงให้พอดีจอ',()=>{
   const entries=spiralYears(1979,2026),second=spiralSlice(entries,1);
   assert.equal(second.length,12);assert.equal(second[0].year,1991);assert.equal(second.at(-1).year,2002);
-  assert.equal(second[0].age,13);assert.equal(second[0].radius,205);assert.equal(second[0].ganzhi,'辛未');
+  assert.equal(second[0].age,13);assert.ok(second.every(entry=>entry.radius===205&&entry.circular));assert.equal(second[0].ganzhi,'辛未');
   assert.equal(spiralSlice(entries,null).length,48);assert.equal(entries[12].radius,283);
   const partial=spiralSlice(spiralYears(2000,2026),2);assert.equal(partial.length,3);assert.equal(partial[0].year,2024);assert.equal(partial.at(-1).year,2026);
 });
