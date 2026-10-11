@@ -39,3 +39,8 @@ export function spiralTextPath(entry,offset,size){
   });
   return 'M '+points.map(point=>point.join(',')).join(' L ');
 }
+
+export function spiralSlice(entries,cycle){
+  if(cycle===null)return entries;
+  return entries.filter(entry=>entry.cycle===cycle).map((entry,index)=>({...entry,radius:205+index*6.5}));
+}
