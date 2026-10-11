@@ -19,15 +19,15 @@ export function spiralYears(birthYear,currentYear,direction=1){
   return Array.from({length:currentYear-birthYear+1},(_,elapsed)=>({year:birthYear+elapsed,age:elapsed+1,ganzhi:yearGanzhi(birthYear+elapsed),cycle:Math.floor(elapsed/12),branch:zodiacIndex(birthYear+elapsed),direction,angle:direction*(zodiacIndex(birthYear)+elapsed)*30,radius:205+elapsed*6.5}));
 }
 export const spiralPoint=(angle,radius)=>[radius*Math.sin((angle+180)*Math.PI/180),-radius*Math.cos((angle+180)*Math.PI/180)];
-export function spiralCell(entry){
+export function spiralCell(entry,halfWidth=32){
   const points=[];
   for(let step=0;step<=8;step++){
     const delta=-.47+step*.94/8;
-    points.push(spiralPoint(entry.angle+delta*30,entry.radius+delta*(entry.circular?0:6.5)*(entry.direction??1)+32));
+    points.push(spiralPoint(entry.angle+delta*30,entry.radius+delta*(entry.circular?0:6.5)*(entry.direction??1)+halfWidth));
   }
   for(let step=8;step>=0;step--){
     const delta=-.47+step*.94/8;
-    points.push(spiralPoint(entry.angle+delta*30,entry.radius+delta*(entry.circular?0:6.5)*(entry.direction??1)-32));
+    points.push(spiralPoint(entry.angle+delta*30,entry.radius+delta*(entry.circular?0:6.5)*(entry.direction??1)-halfWidth));
   }
   return 'M '+points.map(point=>point.join(',')).join(' L ')+' Z';
 }

@@ -1,4 +1,4 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthYear,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice} from './spiral.mjs?v=22';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthYear,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice} from './spiral.mjs?v=25';
 import {branches,phases,profiles,wrap,snap,angleDelta} from './core.mjs';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
@@ -162,7 +162,7 @@ function renderSpiral(){
       const from=spiralPoint(angle,170),to=spiralPoint(angle,244);
       html+=`<path class="cycle-boundary" d="M ${from} L ${to}" stroke="#fbfaf6" stroke-width="11"/><path d="M ${from} L ${to}" stroke="#5d7163" stroke-width="3" stroke-linecap="round"/>`;
     }
-    const marker=(entry,text)=>`<g class="cycle-marker" font-weight="300"><g transform="translate(-360 -360)"><path d="${sector(239,259,entry.angle*direction)}" fill="#e1e2df" stroke="#fbfaf6" stroke-width="1"/></g>${spiralArcLabel({...entry,radius:249,circular:true},0,text,15,'#757a73','marker')}</g>`;
+    const marker=(entry,text)=>`<g class="cycle-marker" font-weight="300"><path d="${spiralCell({...entry,radius:249,circular:true},10)}" fill="#e1e2df" stroke="#fbfaf6" stroke-width="1"/>${spiralArcLabel({...entry,radius:249,circular:true},0,text,15,'#757a73','marker')}</g>`;
     html+=marker(first,visibleEntries.length===1?'เริ่ม / ล่าสุด':`เริ่ม ${shortYear(first.year,era)}`);
     if(visibleEntries.length>1)html+=marker(last,`${visibleEntries.length===12?'จบ':'ล่าสุด'} ${shortYear(last.year,era)}`);
   }
