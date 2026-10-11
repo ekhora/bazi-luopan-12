@@ -1,9 +1,8 @@
-import {clampView,zoomAround,pinchView} from './viewport.mjs?v=17';
 import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthYear,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice} from './spiral.mjs?v=18';
 import {branches,phases,profiles,wrap,snap,angleDelta} from './core.mjs';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
-let mode='phases',birthYear=BIRTH_YEAR,era='BE',cycle=0,selectedYear=birthYear,zoom=1,panX=0,panY=0;
+let mode='phases',birthYear=BIRTH_YEAR,era='BE',cycle=0,selectedYear=birthYear;
 const currentYear=yearNow(new Date());
 let profile='wood', offset=profiles.wood.start, selected=0, practice=false, revealed=false, drag=null, selectedPhase=null;
 let rotation=offset*30, destination=rotation, motionFrame=0, dragFrame=0;
@@ -135,7 +134,6 @@ function spiralArcLabel(entry,offset,text,size,color,key){
 function renderSpiral(){
   const entries=spiralYears(birthYear,currentYear),visibleEntries=spiralSlice(entries,cycle),extent=visibleEntries.at(-1).radius+46;
   const spiral=$('spiral');spiral.setAttribute('viewBox',`${-extent} ${-extent} ${extent*2} ${extent*2}`);
-  applySpiralView();
   let html='';
   html+='<g transform="translate(-360 -360)">';
   for(let i=0;i<12;i++){
@@ -161,7 +159,6 @@ function renderSpiral(){
     return `<option value="${index}">รอบ ${index+1} · ${displayYear(years[0].year,era)}–${displayYear(years.at(-1).year,era)} · ย่าง ${years[0].age}–${years.at(-1).age}</option>`;
   }).join('');
   $('cycle-select').value=cycle===null?'all':String(cycle);
-  $('zoom-out').disabled=zoom<=1;$('zoom-in').disabled=zoom>=3;
 }
 function zodiacIndexForBirth(){return spiralYears(birthYear,birthYear)[0].branch;}
 function setMode(value){
@@ -180,76 +177,18 @@ $('mode-phases').addEventListener('click',()=>setMode('phases'));
 $('mode-years').addEventListener('click',()=>setMode('years'));
 $('era-be').addEventListener('click',()=>setEra('BE'));$('era-ce').addEventListener('click',()=>setEra('CE'));
 $('birth-form').addEventListener('submit',e=>{
-  e.preventDefault();try{birthYear=parseBirthYear($('birth-input').value.trim(),era,currentYear);selectedYear=birthYear;cycle=0;zoom=1,panX=0,panY=0;$('birth-error').hidden=true;renderSpiral();}catch(error){$('birth-error').textContent=error.message;$('birth-error').hidden=false;}
+  e.preventDefault();try{birthYear=parseBirthYear($('birth-input').value.trim(),era,currentYear);selectedYear=birthYear;cycle=0;$('birth-error').hidden=true;renderSpiral();}catch(error){$('birth-error').textContent=error.message;$('birth-error').hidden=false;}
 });
-$('spiral').addEventListener('click',e=>{if(e.detail!==0)return;const cell=e.target.closest('[data-year]');if(cell)selectYear(Number(cell.dataset.year));});
+$('spiral').addEventListener('click',e=>{const cell=e.target.closest('[data-year]');if(cell)selectYear(Number(cell.dataset.year));});
 $('spiral').addEventListener('keydown',e=>{const cell=e.target.closest('[data-year]');if(cell&&(e.key==='Enter'||e.key===' ')){e.preventDefault();selectYear(Number(cell.dataset.year));}});
 function stepCycle(delta){
   const last=Math.floor((currentYear-birthYear)/12);cycle=cycle===null?(delta<0?last:0):Math.max(0,Math.min(last,cycle+delta));chooseCycle(cycle);
 }
 $('cycle-prev').addEventListener('click',()=>stepCycle(-1));$('cycle-next').addEventListener('click',()=>stepCycle(1));
 function chooseCycle(value){
-  cycle=value;zoom=1;panX=panY=0;
+  cycle=value;
   if(cycle!==null&&Math.floor((selectedYear-birthYear)/12)!==cycle)selectedYear=birthYear+cycle*12;
   renderSpiral();
 }
 $('cycle-all').addEventListener('click',()=>chooseCycle(cycle===null?Math.floor((selectedYear-birthYear)/12):null));
 $('cycle-select').addEventListener('change',e=>chooseCycle(e.target.value==='all'?null:Number(e.target.value)));
-const spiralViewport=$('spiral').parentElement;
-const spiralPointers=new Map();
-let spiralMoved=false,spiralTapYear=null,spiralViewFrame=0;
-function applySpiralView(){
-  if(!spiralViewport.clientWidth)return;
-  const view=clampView({zoom,x:panX,y:panY},spiralViewport.clientWidth);
-  zoom=view.zoom;panX=view.x;panY=view.y;
-  $('spiral').style.transform=`translate(${panX}px,${panY}px) scale(${zoom})`;
-  $('zoom-out').disabled=zoom<=1;$('zoom-in').disabled=zoom>=3;
-}
-function queueSpiralView(){
-  if(spiralViewFrame)return;
-  spiralViewFrame=requestAnimationFrame(()=>{spiralViewFrame=0;applySpiralView();});
-}
-function setZoom(value){
-  const view=zoomAround({zoom,x:panX,y:panY},value,{x:0,y:0},spiralViewport.clientWidth);
-  zoom=view.zoom;panX=view.x;panY=view.y;applySpiralView();
-}
-$('zoom-in').addEventListener('click',()=>setZoom(zoom+.5));
-$('zoom-out').addEventListener('click',()=>setZoom(zoom-.5));
-$('zoom-fit').addEventListener('click',()=>{zoom=1;panX=panY=0;applySpiralView();});
-spiralViewport.addEventListener('pointerdown',e=>{
-  if(e.pointerType==='mouse'&&e.button!==0)return;
-  if(spiralPointers.size>=2)return;
-  e.preventDefault();
-  if(spiralPointers.size===0){spiralMoved=false;spiralTapYear=e.target.closest('[data-year]')?.dataset.year;}
-  else spiralMoved=true;
-  const box=spiralViewport.getBoundingClientRect();
-  const position={x:e.clientX-box.left-box.width/2,y:e.clientY-box.top-box.height/2};
-  spiralPointers.set(e.pointerId,{...position,startX:position.x,startY:position.y});
-  spiralViewport.setPointerCapture(e.pointerId);
-  spiralViewport.classList.add('panning');
-});
-spiralViewport.addEventListener('pointermove',e=>{
-  const previous=spiralPointers.get(e.pointerId);if(!previous)return;
-  e.preventDefault();
-  const before=[...spiralPointers.values()];
-  const box=spiralViewport.getBoundingClientRect();
-  const next={...previous,x:e.clientX-box.left-box.width/2,y:e.clientY-box.top-box.height/2};
-  if(Math.hypot(next.x-next.startX,next.y-next.startY)>6)spiralMoved=true;
-  spiralPointers.set(e.pointerId,next);
-  let view={zoom,x:panX,y:panY};
-  if(spiralPointers.size===2){spiralMoved=true;view=pinchView(view,before,[...spiralPointers.values()],box.width);}
-  else if(spiralMoved)view=clampView({...view,x:panX+next.x-previous.x,y:panY+next.y-previous.y},box.width);
-  zoom=view.zoom;panX=view.x;panY=view.y;queueSpiralView();
-});
-function endSpiralPointer(e){
-  if(!spiralPointers.has(e.pointerId))return;
-  const tap=e.type==='pointerup'&&!spiralMoved&&spiralPointers.size===1&&spiralTapYear!==undefined;
-  spiralPointers.delete(e.pointerId);
-  if(spiralViewport.hasPointerCapture(e.pointerId))spiralViewport.releasePointerCapture(e.pointerId);
-  if(spiralPointers.size===0)spiralViewport.classList.remove('panning');
-  if(tap)selectYear(Number(spiralTapYear));
-}
-spiralViewport.addEventListener('pointerup',endSpiralPointer);
-spiralViewport.addEventListener('pointercancel',endSpiralPointer);
-spiralViewport.addEventListener('lostpointercapture',endSpiralPointer);
-window.addEventListener('resize',applySpiralView);
