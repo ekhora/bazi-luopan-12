@@ -18,6 +18,10 @@ export function spiralYears(birthYear,currentYear,direction=1){
   if(!Number.isInteger(birthYear)||!Number.isInteger(currentYear)||birthYear>currentYear||birthYear<1800)throw new Error('ช่วงปีไม่ถูกต้อง');
   return Array.from({length:currentYear-birthYear+1},(_,elapsed)=>({year:birthYear+elapsed,age:elapsed+1,ganzhi:yearGanzhi(birthYear+elapsed),cycle:Math.floor(elapsed/12),branch:zodiacIndex(birthYear+elapsed),direction,angle:direction*(zodiacIndex(birthYear)+elapsed)*30,radius:205+elapsed*6.5}));
 }
+export function zodiacRoundEnd(birthYear,currentYear){
+  if(!Number.isInteger(birthYear)||!Number.isInteger(currentYear)||birthYear>currentYear)throw new Error('ช่วงปีไม่ถูกต้อง');
+  return birthYear+Math.ceil((currentYear-birthYear)/12)*12;
+}
 export const spiralPoint=(angle,radius)=>[radius*Math.sin((angle+180)*Math.PI/180),-radius*Math.cos((angle+180)*Math.PI/180)];
 export function spiralCell(entry,halfWidth=32){
   const points=[];

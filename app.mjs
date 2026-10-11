@@ -1,4 +1,4 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthYear,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice} from './spiral.mjs?v=25';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthYear,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=26';
 import {branches,phases,profiles,wrap,snap,angleDelta} from './core.mjs';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
@@ -133,7 +133,7 @@ function spiralArcLabel(entry,offset,text,size,color,key){
   return `<defs><path id="${id}" d="${spiralTextPath(entry,offset,size)}"/></defs><text text-anchor="middle" font-size="${size}" fill="${color}"><textPath href="#${id}" startOffset="50%">${text}</textPath></text>`;
 }
 function renderSpiral(){
-  const entries=spiralYears(birthYear,currentYear,direction),visibleEntries=spiralSlice(entries,cycle),extent=visibleEntries.at(-1).radius+(cycle===null?46:67);
+  const endYear=zodiacRoundEnd(birthYear,currentYear),entries=spiralYears(birthYear,endYear,direction),visibleEntries=spiralSlice(entries,cycle),extent=visibleEntries.at(-1).radius+(cycle===null?46:67);
   const spiral=$('spiral');spiral.setAttribute('viewBox',`${-extent} ${-extent} ${extent*2} ${extent*2}`);
   let html='';
   html+='<g transform="translate(-360 -360)">';
@@ -152,7 +152,7 @@ function renderSpiral(){
   }
   for(const entry of visibleEntries){
     const fill=entry.year===selectedYear?selectedColors[branches[entry.branch].key]:colors[branches[entry.branch].key];
-    html+=`<g class="year-cell" data-year="${entry.year}" tabindex="0" role="button" aria-label="${era==='BE'?'พ.ศ.':'ค.ศ.'} ${displayYear(entry.year,era)} ${entry.ganzhi} ${branches[entry.branch].zodiac} อายุย่าง ${entry.age} ปี" aria-pressed="${entry.year===selectedYear}"><path d="${spiralCell(entry)}" fill="${fill}" stroke="#f5f2e9" stroke-width="2"/>${spiralArcLabel(entry,0,`${shortYear(entry.year,era)} ${entry.ganzhi} ${entry.age}`,Math.min(24,entry.radius*.44/(3.9+String(entry.age).length*.6)),'#263b33','line')}</g>`;
+    html+=`<g class="year-cell${entry.year>currentYear?' coming-year':''}" data-year="${entry.year}" tabindex="0" role="button" aria-label="${era==='BE'?'พ.ศ.':'ค.ศ.'} ${displayYear(entry.year,era)} ${entry.ganzhi} ${branches[entry.branch].zodiac} อายุย่าง ${entry.age} ปี${entry.year>currentYear?' ปีอนาคต':entry.year===currentYear?' ปีปัจจุบัน':''}" aria-pressed="${entry.year===selectedYear}"><path d="${spiralCell(entry)}" fill="${fill}" stroke="#f5f2e9" stroke-width="2"/>${spiralArcLabel(entry,0,`${shortYear(entry.year,era)} ${entry.ganzhi} ${entry.age}`,Math.min(24,entry.radius*.44/(3.9+String(entry.age).length*.6)),'#263b33','line')}</g>`;
   }
   if(cycle!==null){
     const first=visibleEntries[0],last=visibleEntries.at(-1);
@@ -163,16 +163,16 @@ function renderSpiral(){
       html+=`<path class="cycle-boundary" d="M ${from} L ${to}" stroke="#fbfaf6" stroke-width="11"/><path d="M ${from} L ${to}" stroke="#5d7163" stroke-width="3" stroke-linecap="round"/>`;
     }
     const marker=(entry,text)=>`<g class="cycle-marker" font-weight="300"><path d="${spiralCell({...entry,radius:249,circular:true},10)}" fill="#e1e2df" stroke="#fbfaf6" stroke-width="1"/>${spiralArcLabel({...entry,radius:249,circular:true},0,text,15,'#757a73','marker')}</g>`;
-    html+=marker(first,visibleEntries.length===1?'เริ่ม / ล่าสุด':`เริ่ม ${shortYear(first.year,era)}`);
-    if(visibleEntries.length>1)html+=marker(last,`${visibleEntries.length===12?'จบ':'ล่าสุด'} ${shortYear(last.year,era)}`);
+    html+=marker(first,visibleEntries.length===1?`เริ่ม/จบ ${shortYear(first.year,era)}`:`เริ่ม ${shortYear(first.year,era)}`);
+    if(visibleEntries.length>1)html+=marker(last,`${'จบ'} ${shortYear(last.year,era)}`);
   }
   html+='<circle cx="0" cy="0" r="85" fill="#fbfaf6" stroke="#dedfd2"/><text x="0" y="-35" text-anchor="middle" font-size="18" fill="#727a6e">ปีเกิด · '+branches[zodiacIndexForBirth()].zodiac+'</text><text x="0" y="4" text-anchor="middle" font-size="36" fill="#497c61">'+displayYear(birthYear,era)+'</text><text x="0" y="36" text-anchor="middle" font-size="19" fill="#727a6e">'+(era==='BE'?'พ.ศ.':'ค.ศ.')+'</text>';
   spiral.innerHTML=html;
   const count=Math.ceil(entries.length/12),activeEntries=cycle===null?entries:entries.filter(e=>e.cycle===cycle);
   $('year-caption').textContent=(cycle===null?'ทุกรอบ':`รอบที่ ${cycle+1} / ${count}`)+` · ${displayYear(activeEntries[0].year,era)}–${displayYear(activeEntries.at(-1).year,era)}`;
-  $('cycle-guide').textContent=cycle===null?'':`เริ่ม → ไล่${direction===1?'ตาม':'ทวน'}เข็มนาฬิกา → ${visibleEntries.length===12?'จบ':'ปีล่าสุด · รอบนี้ยังไม่ครบ 12 ปี'}`;
+  $('cycle-guide').textContent=(cycle===null?'':`เริ่ม → ไล่${direction===1?'ตาม':'ทวน'}เข็มนาฬิกา → จบ · `)+`ปีปัจจุบัน ${displayYear(currentYear,era)} · ปิดรอบนักษัตร ${displayYear(endYear,era)}`;
   const chosen=entries.find(e=>e.year===selectedYear);
-  $('year-selection').textContent=`${era==='BE'?'พ.ศ.':'ค.ศ.'} ${displayYear(chosen.year,era)} · ${chosen.ganzhi} ${branches[chosen.branch].zodiac} · อายุย่าง ${chosen.age} ปี`;
+  $('year-selection').textContent=`${era==='BE'?'พ.ศ.':'ค.ศ.'} ${displayYear(chosen.year,era)} · ${chosen.ganzhi} ${branches[chosen.branch].zodiac} · อายุย่าง ${chosen.age} ปี${chosen.year>currentYear?' · ปีอนาคต':chosen.year===currentYear?' · ปีปัจจุบัน':''}`;
   $('cycle-prev').disabled=cycle===0; $('cycle-next').disabled=cycle===count-1;
   $('cycle-all').textContent=cycle===null?'ดูทีละรอบ':'ดูทุกรอบ';
   $('cycle-select').innerHTML='<option value="all">ดูทุกรอบ</option>'+Array.from({length:count},(_,index)=>{
@@ -203,7 +203,7 @@ $('birth-form').addEventListener('submit',e=>{
 $('spiral').addEventListener('click',e=>{const cell=e.target.closest('[data-year]');if(cell)selectYear(Number(cell.dataset.year));});
 $('spiral').addEventListener('keydown',e=>{const cell=e.target.closest('[data-year]');if(cell&&(e.key==='Enter'||e.key===' ')){e.preventDefault();selectYear(Number(cell.dataset.year));}});
 function stepCycle(delta){
-  const last=Math.floor((currentYear-birthYear)/12);cycle=cycle===null?(delta<0?last:0):Math.max(0,Math.min(last,cycle+delta));chooseCycle(cycle);
+  const last=Math.floor((zodiacRoundEnd(birthYear,currentYear)-birthYear)/12);cycle=cycle===null?(delta<0?last:0):Math.max(0,Math.min(last,cycle+delta));chooseCycle(cycle);
 }
 $('cycle-prev').addEventListener('click',()=>stepCycle(-1));$('cycle-next').addEventListener('click',()=>stepCycle(1));
 function chooseCycle(value){

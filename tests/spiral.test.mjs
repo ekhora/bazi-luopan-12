@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {spiralYears,zodiacIndex,displayYear,parseBirthYear,yearNow,spiralCell,yearGanzhi,spiralTextPath,shortYear,spiralSlice,spiralPoint} from '../spiral.mjs';
+import {spiralYears,zodiacIndex,displayYear,parseBirthYear,yearNow,spiralCell,yearGanzhi,spiralTextPath,shortYear,spiralSlice,spiralPoint,zodiacRoundEnd} from '../spiral.mjs';
 test('เกิดมะแม 2522: 48 ปีตั้งแต่อายุย่าง 1 ถึง 48 ในปี 2026',()=>{
   const entries=spiralYears(1979,2026);
   assert.equal(entries.length,48);assert.equal(entries[0].branch,7);assert.equal(entries[0].age,1);assert.equal(entries[47].age,48);assert.equal(entries[47].year,2026);
@@ -47,4 +47,12 @@ test('สลับตามเข็มและทวนเข็มสะท�
     assert.doesNotMatch(spiralCell(ccw[i]),/NaN|Infinity/);assert.doesNotMatch(spiralTextPath(ccw[i],0,24),/NaN|Infinity/);
   }
   assert.equal(ccw[1].angle-ccw[0].angle,-30);assert.throws(()=>spiralYears(1979,2026,0));
+});
+
+test('ขยายปีถึงนักษัตรเกิดกลับมาปิดรอบ เช่น 2522 ถึง 2570',()=>{
+  assert.equal(zodiacRoundEnd(1979,2026),2027);assert.equal(zodiacRoundEnd(1979,2027),2027);assert.equal(zodiacRoundEnd(1979,2028),2039);
+  assert.equal(zodiacRoundEnd(2000,2026),2036);assert.equal(zodiacRoundEnd(2026,2026),2026);
+  const end=zodiacRoundEnd(1979,2026),entries=spiralYears(1979,end);
+  assert.equal(entries.length,49);assert.equal(entries.at(-1).year,2027);assert.equal(entries.at(-1).age,49);assert.equal(entries.at(-1).ganzhi,'丁未');
+  assert.equal(entries.at(-1).branch,entries[0].branch);assert.equal(spiralSlice(entries,4).length,1);
 });
