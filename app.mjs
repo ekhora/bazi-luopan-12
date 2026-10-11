@@ -152,7 +152,7 @@ function renderSpiral(){
   }
   for(const entry of visibleEntries){
     const fill=entry.year===selectedYear?selectedColors[branches[entry.branch].key]:colors[branches[entry.branch].key];
-    html+=`<g class="year-cell${entry.year>currentYear?' coming-year':''}" data-year="${entry.year}" tabindex="0" role="button" aria-label="${era==='BE'?'พ.ศ.':'ค.ศ.'} ${displayYear(entry.year,era)} ${entry.ganzhi} ${branches[entry.branch].zodiac} อายุย่าง ${entry.age} ปี${entry.year>currentYear?' ปีอนาคต':entry.year===currentYear?' ปีปัจจุบัน':''}" aria-pressed="${entry.year===selectedYear}"><path d="${spiralCell(entry)}" fill="${fill}" stroke="#f5f2e9" stroke-width="2"/>${spiralArcLabel(entry,0,`${shortYear(entry.year,era)} ${entry.ganzhi} ${entry.age}`,Math.min(24,entry.radius*.44/(3.9+String(entry.age).length*.6)),'#263b33','line')}</g>`;
+    html+=`<g class="year-cell${entry.year>currentYear?' coming-year':''}" data-year="${entry.year}" tabindex="0" role="button" aria-label="อายุย่าง ${entry.age} ปี ${entry.ganzhi} ${branches[entry.branch].zodiac} ${era==='BE'?'พ.ศ.':'ค.ศ.'} ${displayYear(entry.year,era)}${entry.year>currentYear?' ปีอนาคต':entry.year===currentYear?' ปีปัจจุบัน':''}" aria-pressed="${entry.year===selectedYear}"><path d="${spiralCell(entry)}" fill="${fill}" stroke="#f5f2e9" stroke-width="2"/>${spiralArcLabel(entry,0,`<tspan>${entry.age} ${entry.ganzhi} </tspan><tspan fill="#969b91" font-weight="300">${shortYear(entry.year,era)}</tspan>`,Math.min(24,entry.radius*.44/(3.9+String(entry.age).length*.6)),'#263b33','line')}</g>`;
   }
   if(cycle!==null){
     const first=visibleEntries[0],last=visibleEntries.at(-1);
@@ -172,7 +172,7 @@ function renderSpiral(){
   $('year-caption').textContent=(cycle===null?'ทุกรอบ':`รอบที่ ${cycle+1} / ${count}`)+` · ${displayYear(activeEntries[0].year,era)}–${displayYear(activeEntries.at(-1).year,era)}`;
   $('cycle-guide').textContent=(cycle===null?'':`เริ่ม → ไล่${direction===1?'ตาม':'ทวน'}เข็มนาฬิกา → จบ · `)+`ปีปัจจุบัน ${displayYear(currentYear,era)} · ปิดรอบนักษัตร ${displayYear(endYear,era)}`;
   const chosen=entries.find(e=>e.year===selectedYear);
-  $('year-selection').textContent=`${era==='BE'?'พ.ศ.':'ค.ศ.'} ${displayYear(chosen.year,era)} · ${chosen.ganzhi} ${branches[chosen.branch].zodiac} · อายุย่าง ${chosen.age} ปี${chosen.year>currentYear?' · ปีอนาคต':chosen.year===currentYear?' · ปีปัจจุบัน':''}`;
+  $('year-selection').innerHTML=`อายุย่าง ${chosen.age} ปี · ${chosen.ganzhi} ${branches[chosen.branch].zodiac} · <span class="muted-year">${era==='BE'?'พ.ศ.':'ค.ศ.'} ${displayYear(chosen.year,era)}</span>${chosen.year>currentYear?' · ปีอนาคต':chosen.year===currentYear?' · ปีปัจจุบัน':''}`;
   $('cycle-prev').disabled=cycle===0; $('cycle-next').disabled=cycle===count-1;
   $('cycle-all').textContent=cycle===null?'ดูทีละรอบ':'ดูทุกรอบ';
   $('cycle-select').innerHTML='<option value="all">ดูทุกรอบ</option>'+Array.from({length:count},(_,index)=>{
