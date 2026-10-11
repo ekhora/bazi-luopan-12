@@ -161,11 +161,7 @@ function renderSpiral(){
       const from=spiralPoint(angle,170),to=spiralPoint(angle,244);
       html+=`<path class="cycle-boundary" d="M ${from} L ${to}" stroke="#fbfaf6" stroke-width="11"/><path d="M ${from} L ${to}" stroke="#5d7163" stroke-width="3" stroke-linecap="round"/>`;
     }
-    const marker=(entry,text)=>{
-      const [anchorX,y]=spiralPoint(entry.angle,263),width=text.length*10+16;
-      const x=Math.max(-extent+width/2+4,Math.min(extent-width/2-4,anchorX));
-      return `<g class="cycle-marker"><rect x="${x-width/2}" y="${y-13}" width="${width}" height="26" rx="9" fill="#fbfaf6" stroke="#c3cebe"/><text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="16" fill="#46664f">${text}</text></g>`;
-    };
+    const marker=(entry,text)=>`<g class="cycle-marker" font-weight="300">${spiralArcLabel({...entry,radius:263,circular:true},0,text,15,'#899185','marker')}</g>`;
     html+=marker(first,visibleEntries.length===1?'เริ่ม / ล่าสุด':`เริ่ม ${shortYear(first.year,era)}`);
     if(visibleEntries.length>1)html+=marker(last,`${visibleEntries.length===12?'จบ':'ล่าสุด'} ${shortYear(last.year,era)}`);
   }
