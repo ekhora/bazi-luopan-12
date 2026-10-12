@@ -3,7 +3,7 @@ import {branches,phases,profiles,wrap,snap,angleDelta} from './core.mjs';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
-let mode='phases',birthYear=BIRTH_YEAR,era='BE',cycle=0,selectedYear=birthYear;
+let mode='phases',birthYear=BIRTH_YEAR,era='BE',cycle=null,selectedYear=birthYear;
 const currentYear=yearNow(new Date());
 let profile='wood', offset=profiles.wood.start, selected=0, practice=false, revealed=false, drag=null, selectedPhase=null;
 let rotation=offset*30, destination=rotation, motionFrame=0, dragFrame=0;
@@ -198,7 +198,7 @@ $('mode-phases').addEventListener('click',()=>setMode('phases'));
 $('mode-years').addEventListener('click',()=>setMode('years'));
 $('era-be').addEventListener('click',()=>setEra('BE'));$('era-ce').addEventListener('click',()=>setEra('CE'));
 $('birth-form').addEventListener('submit',e=>{
-  e.preventDefault();try{birthYear=parseBirthYear($('birth-input').value.trim(),era,currentYear);selectedYear=birthYear;cycle=0;$('birth-error').hidden=true;renderSpiral();}catch(error){$('birth-error').textContent=error.message;$('birth-error').hidden=false;}
+  e.preventDefault();try{birthYear=parseBirthYear($('birth-input').value.trim(),era,currentYear);selectedYear=birthYear;cycle=null;$('birth-error').hidden=true;renderSpiral();}catch(error){$('birth-error').textContent=error.message;$('birth-error').hidden=false;}
 });
 $('spiral').addEventListener('click',e=>{const cell=e.target.closest('[data-year]');if(cell)selectYear(Number(cell.dataset.year));});
 $('spiral').addEventListener('keydown',e=>{const cell=e.target.closest('[data-year]');if(cell&&(e.key==='Enter'||e.key===' ')){e.preventDefault();selectYear(Number(cell.dataset.year));}});
