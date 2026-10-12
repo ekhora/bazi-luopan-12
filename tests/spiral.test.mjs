@@ -49,10 +49,13 @@ test('สลับตามเข็มและทวนเข็มสะท�
   assert.equal(ccw[1].angle-ccw[0].angle,-30);assert.throws(()=>spiralYears(1979,2026,0));
 });
 
-test('ขยายปีถึงนักษัตรเกิดกลับมาปิดรอบ เช่น 2522 ถึง 2570',()=>{
-  assert.equal(zodiacRoundEnd(1979,2026),2027);assert.equal(zodiacRoundEnd(1979,2027),2027);assert.equal(zodiacRoundEnd(1979,2028),2039);
-  assert.equal(zodiacRoundEnd(2000,2026),2036);assert.equal(zodiacRoundEnd(2026,2026),2026);
-  const end=zodiacRoundEnd(1979,2026),entries=spiralYears(1979,end);
-  assert.equal(entries.length,49);assert.equal(entries.at(-1).year,2027);assert.equal(entries.at(-1).age,49);assert.equal(entries.at(-1).ganzhi,'丁未');
-  assert.equal(entries.at(-1).branch,entries[0].branch);assert.equal(spiralSlice(entries,4).length,1);
+test('จบรอบละ 12 ปีโดยไม่เพิ่มรอบ 2570 ที่มีปีเดียว',()=>{
+  assert.equal(zodiacRoundEnd(1979,2026),2026);assert.equal(zodiacRoundEnd(1979,2027),2038);assert.equal(zodiacRoundEnd(1979,2028),2038);
+  assert.equal(zodiacRoundEnd(2000,2026),2035);assert.equal(zodiacRoundEnd(2026,2026),2037);
+  const entries=spiralYears(1979,zodiacRoundEnd(1979,2026));
+  assert.equal(entries.length,48);assert.equal(entries.at(-1).year,2026);assert.equal(entries.at(-1).age,48);
+  assert.equal(spiralSlice(entries,3).length,12);assert.equal(spiralSlice(entries,4).length,0);
+  for(let birth=1900;birth<=2026;birth++){
+    const end=zodiacRoundEnd(birth,2026);assert.ok(end>=2026);assert.equal((end-birth+1)%12,0);assert.ok(end-2026<12);
+  }
 });
