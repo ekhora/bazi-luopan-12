@@ -6,8 +6,8 @@
   <meta name="description" content="วงล้อ 12 กิ่งดินสำหรับมือถือ หมุนฉางเซิงตามนิ้วและลงล็อกเมื่อปล่อย สำหรับฝึกท่องจำปาจื้อ">
   <title>วงล้อฉางเซิง · 12 กิ่งดิน</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=31">
-  <script type="module" src="./app.mjs?v=31"></script>
+  <link rel="stylesheet" href="./style.css?v=32">
+  <script type="module" src="./app.mjs?v=32"></script>
 </head>
 <body>
   <header><a class="brand" href="./"><span class="brand-icon">十二</span><h1>วงล้อฉางเซิง<small>12 กิ่งดิน · สือเอ้อร์ฉางเซิง</small></h1></a><button id="settings-open" class="settings-button" aria-label="ตั้งค่า" aria-haspopup="dialog" title="ตั้งค่า">⚙</button></header>
@@ -47,13 +47,12 @@
       <form id="birth-form" class="birth-controls">
         <label for="birth-input">ปีเกิด <span id="birth-era">พ.ศ.</span></label>
         <input id="birth-input" type="text" inputmode="numeric" maxlength="4" value="2522" required aria-describedby="birth-error">
-        <button type="submit">คำนวณ</button>
         <div class="era-switch"><button type="button" id="era-be" aria-pressed="true">พ.ศ.</button><button type="button" id="era-ce" aria-pressed="false">ค.ศ.</button></div>
       </form>
       <p id="birth-error" role="alert" hidden></p>
 
     </section>
-    <button id="settings-done" class="settings-done">เสร็จแล้ว</button>
+    <button id="settings-done" class="settings-done" type="submit" form="birth-form">บันทึก</button>
   </dialog>
   <footer><span>ก้านฟ้าหยาง · เสียงจีนกลาง</span><a href="https://zh.wikisource.org/zh-hant/三命通會/卷二" target="_blank" rel="noopener noreferrer">แหล่งอ้างอิง ↗</a></footer>
   <noscript><p>โปรดเปิด JavaScript เพื่อใช้งานวงล้อ</p></noscript>

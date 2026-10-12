@@ -190,7 +190,8 @@ function setMode(value){
   if(mode==='years')renderSpiral();else{renderWheel();renderControls();}
 }
 function setEra(value){
-  era=value;$('birth-input').value=displayYear(birthYear,era);$('birth-era').textContent=era==='BE'?'พ.ศ.':'ค.ศ.';
+  let enteredYear;try{enteredYear=parseBirthYear($('birth-input').value.trim(),era,currentYear);}catch{enteredYear=birthYear;}
+  era=value;$('birth-input').value=displayYear(enteredYear,era);$('birth-era').textContent=era==='BE'?'พ.ศ.':'ค.ศ.';
   $('era-be').setAttribute('aria-pressed',String(era==='BE'));$('era-ce').setAttribute('aria-pressed',String(era==='CE'));$('birth-error').hidden=true;renderSpiral();
 }
 function selectYear(year){selectedYear=year;if(cycle!==null)cycle=Math.floor((year-birthYear)/12);renderSpiral();$('spiral').querySelector(`[data-year="${year}"]`)?.focus({preventScroll:true});}
@@ -198,7 +199,7 @@ $('mode-phases').addEventListener('click',()=>setMode('phases'));
 $('mode-years').addEventListener('click',()=>setMode('years'));
 $('era-be').addEventListener('click',()=>setEra('BE'));$('era-ce').addEventListener('click',()=>setEra('CE'));
 $('birth-form').addEventListener('submit',e=>{
-  e.preventDefault();try{birthYear=parseBirthYear($('birth-input').value.trim(),era,currentYear);selectedYear=birthYear;cycle=null;$('birth-error').hidden=true;renderSpiral();}catch(error){$('birth-error').textContent=error.message;$('birth-error').hidden=false;}
+  e.preventDefault();try{birthYear=parseBirthYear($('birth-input').value.trim(),era,currentYear);selectedYear=birthYear;cycle=null;$('birth-error').hidden=true;$('birth-input').removeAttribute('aria-invalid');renderSpiral();closeSettings();}catch(error){$('birth-error').textContent=error.message;$('birth-error').hidden=false;$('birth-input').setAttribute('aria-invalid','true');$('birth-input').focus();}
 });
 $('spiral').addEventListener('click',e=>{const cell=e.target.closest('[data-year]');if(cell)selectYear(Number(cell.dataset.year));});
 $('spiral').addEventListener('keydown',e=>{const cell=e.target.closest('[data-year]');if(cell&&(e.key==='Enter'||e.key===' ')){e.preventDefault();selectYear(Number(cell.dataset.year));}});
@@ -225,10 +226,9 @@ $('direction-cw').addEventListener('click',()=>setDirection(1));
 $('direction-ccw').addEventListener('click',()=>setDirection(-1));
 
 const settingsDialog=$('settings-dialog');
-$('settings-open').addEventListener('click',()=>{settingsDialog.showModal();document.body.classList.add('settings-active');});
+$('settings-open').addEventListener('click',()=>{$('birth-input').value=displayYear(birthYear,era);$('birth-error').hidden=true;$('birth-input').removeAttribute('aria-invalid');settingsDialog.showModal();document.body.classList.add('settings-active');});
 function closeSettings(){settingsDialog.close();}
 $('settings-close').addEventListener('click',closeSettings);
-$('settings-done').addEventListener('click',closeSettings);
 settingsDialog.addEventListener('close',()=>{document.body.classList.remove('settings-active');$('settings-open').focus({preventScroll:true});});
 settingsDialog.addEventListener('click',e=>{
   if(e.target!==settingsDialog)return;
