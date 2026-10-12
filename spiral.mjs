@@ -10,12 +10,21 @@ export const shortYear=(year,era='BE')=>String(displayYear(year,era)).slice(-2);
 export function parseBirthYear(value,era,currentYear){
   if(!/^\d{4}$/.test(String(value)))throw new Error('กรอกปีเกิดเป็นเลข 4 หลัก');
   const year=Number(value)-(era==='BE'?543:0);
-  if(year<1800||year>currentYear)throw new Error(`ปีเกิดต้องอยู่ระหว่าง ${displayYear(1800,era)}–${displayYear(currentYear,era)}`);
+  if(year<currentYear-998||year>currentYear)throw new Error(`กรอกอายุย่าง 1–999 หรือปีเกิด ${displayYear(currentYear-998,era)}–${displayYear(currentYear,era)}`);
   return year;
+}
+export function parseBirthInput(value,era,currentYear){
+  const text=String(value).trim();
+  if(!/^\d{1,4}$/.test(text))throw new Error('กรอกปีเกิด 4 หลัก หรืออายุย่าง 1–999 เป็นจำนวนเต็ม');
+  const number=Number(text);
+  if(number<1)throw new Error('อายุย่างต้องไม่น้อยกว่า 1 และไม่เกิน 999');
+  if(number<=999)return {year:currentYear-number+1,age:number,kind:'age'};
+  const year=parseBirthYear(text,era,currentYear);
+  return {year,age:currentYear-year+1,kind:'year'};
 }
 export function spiralYears(birthYear,currentYear,direction=1){
   if(direction!==1&&direction!==-1)throw new Error('ทิศทางไม่ถูกต้อง');
-  if(!Number.isInteger(birthYear)||!Number.isInteger(currentYear)||birthYear>currentYear||birthYear<1800)throw new Error('ช่วงปีไม่ถูกต้อง');
+  if(!Number.isInteger(birthYear)||!Number.isInteger(currentYear)||birthYear>currentYear||birthYear<1)throw new Error('ช่วงปีไม่ถูกต้อง');
   return Array.from({length:currentYear-birthYear+1},(_,elapsed)=>({year:birthYear+elapsed,age:elapsed+1,ganzhi:yearGanzhi(birthYear+elapsed),cycle:Math.floor(elapsed/12),branch:zodiacIndex(birthYear+elapsed),direction,angle:direction*(zodiacIndex(birthYear)+elapsed)*30,radius:205+elapsed*6.5}));
 }
 export function zodiacRoundEnd(birthYear,currentYear){

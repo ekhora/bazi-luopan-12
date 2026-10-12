@@ -1,4 +1,4 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthYear,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=30';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=33';
 import {branches,phases,profiles,wrap,snap,angleDelta} from './core.mjs';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
@@ -190,8 +190,8 @@ function setMode(value){
   if(mode==='years')renderSpiral();else{renderWheel();renderControls();}
 }
 function setEra(value){
-  let enteredYear;try{enteredYear=parseBirthYear($('birth-input').value.trim(),era,currentYear);}catch{enteredYear=birthYear;}
-  era=value;$('birth-input').value=displayYear(enteredYear,era);$('birth-era').textContent=era==='BE'?'พ.ศ.':'ค.ศ.';
+  let entered;try{entered=parseBirthInput($('birth-input').value.trim(),era,currentYear);}catch{entered={year:birthYear,kind:'year'};}
+  era=value;if(entered.kind==='year')$('birth-input').value=displayYear(entered.year,era);$('birth-era').textContent=era==='BE'?'พ.ศ.':'ค.ศ.';
   $('era-be').setAttribute('aria-pressed',String(era==='BE'));$('era-ce').setAttribute('aria-pressed',String(era==='CE'));$('birth-error').hidden=true;renderSpiral();
 }
 function selectYear(year){selectedYear=year;if(cycle!==null)cycle=Math.floor((year-birthYear)/12);renderSpiral();$('spiral').querySelector(`[data-year="${year}"]`)?.focus({preventScroll:true});}
@@ -199,7 +199,7 @@ $('mode-phases').addEventListener('click',()=>setMode('phases'));
 $('mode-years').addEventListener('click',()=>setMode('years'));
 $('era-be').addEventListener('click',()=>setEra('BE'));$('era-ce').addEventListener('click',()=>setEra('CE'));
 $('birth-form').addEventListener('submit',e=>{
-  e.preventDefault();try{birthYear=parseBirthYear($('birth-input').value.trim(),era,currentYear);selectedYear=birthYear;cycle=null;$('birth-error').hidden=true;$('birth-input').removeAttribute('aria-invalid');renderSpiral();closeSettings();}catch(error){$('birth-error').textContent=error.message;$('birth-error').hidden=false;$('birth-input').setAttribute('aria-invalid','true');$('birth-input').focus();}
+  e.preventDefault();try{birthYear=parseBirthInput($('birth-input').value.trim(),era,currentYear).year;$('birth-input').value=displayYear(birthYear,era);selectedYear=birthYear;cycle=null;$('birth-error').hidden=true;$('birth-input').removeAttribute('aria-invalid');renderSpiral();closeSettings();}catch(error){$('birth-error').textContent=error.message;$('birth-error').hidden=false;$('birth-input').setAttribute('aria-invalid','true');$('birth-input').focus();}
 });
 $('spiral').addEventListener('click',e=>{const cell=e.target.closest('[data-year]');if(cell)selectYear(Number(cell.dataset.year));});
 $('spiral').addEventListener('keydown',e=>{const cell=e.target.closest('[data-year]');if(cell&&(e.key==='Enter'||e.key===' ')){e.preventDefault();selectYear(Number(cell.dataset.year));}});

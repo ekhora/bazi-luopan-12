@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {spiralYears,zodiacIndex,displayYear,parseBirthYear,yearNow,spiralCell,yearGanzhi,spiralTextPath,shortYear,spiralSlice,spiralPoint,zodiacRoundEnd} from '../spiral.mjs';
+import {spiralYears,zodiacIndex,displayYear,parseBirthYear,parseBirthInput,yearNow,spiralCell,yearGanzhi,spiralTextPath,shortYear,spiralSlice,spiralPoint,zodiacRoundEnd} from '../spiral.mjs';
 test('เกิดมะแม 2522: 48 ปีตั้งแต่อายุย่าง 1 ถึง 48 ในปี 2026',()=>{
   const entries=spiralYears(1979,2026);
   assert.equal(entries.length,48);assert.equal(entries[0].branch,7);assert.equal(entries[0].age,1);assert.equal(entries[47].age,48);assert.equal(entries[47].year,2026);
@@ -58,4 +58,14 @@ test('จบรอบละ 12 ปีโดยไม่เพิ่มรอบ 
   for(let birth=1900;birth<=2026;birth++){
     const end=zodiacRoundEnd(birth,2026);assert.ok(end>=2026);assert.equal((end-birth+1)%12,0);assert.ok(end-2026<12);
   }
+});
+
+test('กรอกอายุ 1–999 เพื่อตั้งปีเกิด โดยอายุย่าง 48 เท่ากับ 2522',()=>{
+  assert.deepEqual(parseBirthInput('48','BE',2026),{year:1979,age:48,kind:'age'});
+  assert.deepEqual(parseBirthInput('48','CE',2026),{year:1979,age:48,kind:'age'});
+  assert.equal(parseBirthInput('1','BE',2026).year,2026);
+  const oldest=parseBirthInput('999','BE',2026);assert.equal(oldest.year,1028);assert.equal(parseBirthInput(String(displayYear(oldest.year,'BE')),'BE',2026).age,999);assert.equal(parseBirthInput('1028','CE',2026).age,999);
+  assert.equal(spiralYears(oldest.year,zodiacRoundEnd(oldest.year,2026)).at(-1).age,1008);
+  assert.deepEqual(parseBirthInput('2522','BE',2026),{year:1979,age:48,kind:'year'});assert.equal(parseBirthInput('1979','CE',2026).year,1979);
+  for(const input of ['0','0000','-1','1000','9999','1.5','abc',''])assert.throws(()=>parseBirthInput(input,'BE',2026));
 });
