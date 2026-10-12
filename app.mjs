@@ -163,8 +163,8 @@ function renderSpiral(){
       html+=`<path class="cycle-boundary" d="M ${from} L ${to}" stroke="#fbfaf6" stroke-width="11"/><path d="M ${from} L ${to}" stroke="#5d7163" stroke-width="3" stroke-linecap="round"/>`;
     }
     const marker=(entry,text)=>`<g class="cycle-marker" font-weight="300"><path d="${spiralCell({...entry,radius:249,circular:true},10)}" fill="#e1e2df" stroke="#fbfaf6" stroke-width="1"/>${spiralArcLabel({...entry,radius:249,circular:true},0,text,15,'#757a73','marker')}</g>`;
-    html+=marker(first,visibleEntries.length===1?`เริ่ม/จบ ${shortYear(first.year,era)}`:`เริ่ม ${shortYear(first.year,era)}`);
-    if(visibleEntries.length>1)html+=marker(last,`${'จบ'} ${shortYear(last.year,era)}`);
+    html+=marker(first,visibleEntries.length===1?`เริ่ม/จบ ${displayYear(first.year,era)}`:`เริ่ม ${displayYear(first.year,era)}`);
+    if(visibleEntries.length>1)html+=marker(last,`จบ ${displayYear(last.year,era)}`);
   }
   html+='<circle cx="0" cy="0" r="85" fill="#fbfaf6" stroke="#dedfd2"/><text x="0" y="-35" text-anchor="middle" font-size="18" fill="#727a6e">ปีเกิด · '+branches[zodiacIndexForBirth()].zodiac+'</text><text x="0" y="4" text-anchor="middle" font-size="36" fill="#497c61">'+displayYear(birthYear,era)+'</text><text x="0" y="36" text-anchor="middle" font-size="19" fill="#727a6e">'+(era==='BE'?'พ.ศ.':'ค.ศ.')+'</text>';
   spiral.innerHTML=html;
