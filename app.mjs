@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=59';
-import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=59';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=60';
+import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=60';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -318,6 +318,7 @@ function setMode(value){
   if(drag){const pointer=drag.id;drag=null;svg.classList.remove('dragging');if(svg.hasPointerCapture(pointer))svg.releasePointerCapture(pointer);}
   cancelMotion();rotation=destination=offset*30;mode=value;
   $('phase-view').hidden=mode!=='phases';$('years-view').hidden=mode!=='years';
+  $('settings-dialog').dataset.mode=mode;
   $('mode-phases').setAttribute('aria-pressed',String(mode==='phases'));$('mode-years').setAttribute('aria-pressed',String(mode==='years'));
   if(mode==='years')renderSpiral();else{renderWheel();renderControls();}
 }
@@ -372,6 +373,7 @@ $('direction-cw').addEventListener('click',()=>setDirection(1));
 $('direction-ccw').addEventListener('click',()=>setDirection(-1));
 
 const settingsDialog=$('settings-dialog');
+$('settings-close-phases').addEventListener('click',()=>settingsDialog.close());
 $('settings-open').addEventListener('click',()=>{$('birth-input').value=displayYear(birthYear,era);$('birth-error').hidden=true;$('birth-input').removeAttribute('aria-invalid');settingsDialog.showModal();document.body.classList.add('settings-active');});
 function closeSettings(){settingsDialog.close();}
 $('settings-close').addEventListener('click',closeSettings);
