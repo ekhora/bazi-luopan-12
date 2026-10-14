@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=56';
-import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=56';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=57';
+import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=57';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -142,12 +142,10 @@ function renderWheel(){
 }
 function renderControls(){
   $('stem-toggle').checked=showStems;$('phase-toggle').checked=showPhases;
-  for(const id of ['rotation-controls','step-status','alignment','practice-section'])$(id).hidden=!showPhases;
-  $('wheel-caption').style.visibility=showPhases||showStems?'':'hidden';
+  for(const id of ['rotation-controls','step-status','practice-section'])$(id).hidden=!showPhases;
   $('today-pillar').hidden=!showStems;
   $('today-pillar').textContent=`◎ วันนี้ ${stemRing[today.stem].han}${branches[today.branch].han}`;
   const p=profiles[profile];
-  $('alignment').textContent=offset===p.start?p.name+' · ตำแหน่งตามหลัก':'หมุนเอง · '+p.name;
   document.documentElement.style.setProperty('--green',p.color);
   $('reveal').hidden=!practice||!showPhases;
   $('reveal').disabled=revealed;
