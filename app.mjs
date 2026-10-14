@@ -81,7 +81,6 @@ function renderControls(){
   const p=profiles[profile];
   $('alignment').textContent=offset===p.start?p.name+' · ตำแหน่งตามหลัก':'หมุนเอง · '+p.name;
   document.documentElement.style.setProperty('--green',p.color);
-  $('profiles').innerHTML=Object.entries(profiles).map(([key,p])=>`<button data-profile="${key}" class="${key===profile?'active':''}" style="--accent:${p.color}" aria-label="${p.han} ${p.reading} ${p.name}" aria-pressed="${key===profile}"><span class="han">${p.han}</span><span>${({wood:"ไม้",fire:"ไฟ",metal:"ทอง",water:"น้ำ"})[key]}<small>${p.reading}</small></span></button>`).join('');
   $('reveal').hidden=!practice;
   $('reveal').disabled=revealed;
   $('reveal').textContent=revealed?'เฉลยแล้ว':'เฉลยช่องที่เลือก';
@@ -107,7 +106,6 @@ function alignProfile(){const target=profiles[profile].start*30;animateTo(rotati
 function choosePhase(i){selectedPhase=i;if(practice){selected=wrap(i+offset);revealed=false;}renderWheel();renderControls();svg.querySelector(`[data-phase="${i}"]`)?.focus({preventScroll:true});}
 function chooseBranch(i){selected=i;revealed=false;renderWheel();renderControls();svg.querySelector(`[data-branch="${i}"]`)?.focus({preventScroll:true});}
 function cycleCenterProfile(){profile=nextProfile(profile);alignProfile();svg.querySelector('[data-center-profile]')?.focus({preventScroll:true});}
-$('profiles').addEventListener('click',e=>{const button=e.target.closest('[data-profile]');if(!button)return;profile=button.dataset.profile;alignProfile();$('profiles').querySelector(`[data-profile="${profile}"]`).focus({preventScroll:true});});
 $('prev').addEventListener('click',()=>rotate(-1));$('next').addEventListener('click',()=>rotate(1));
 $('reset').addEventListener('click',alignProfile);
 $('practice').addEventListener('change',e=>{practice=e.target.checked;revealed=false;renderWheel();renderControls();});
