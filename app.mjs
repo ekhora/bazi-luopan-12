@@ -13,6 +13,8 @@ const selectedColors={spring:'#d0dfcc',summer:'#ecd0b7',autumn:'#ded2af',winter:
 // 長生, 帝旺 and 墓 share the element palette of the selected yang stem.
 const phaseColors={wood:'#c9dfc0',fire:'#f1c0a5',metal:'#d3d7db',water:'#bed5eb'};
 const highlightedPhases=new Set([0,4,8]);
+const directionElements=['water','earth','wood','wood','fire','earth','metal','metal'];
+const directionColors={wood:'#dfecdd',fire:'#f6dfcc',earth:'#ece2c6',metal:'#e1e4e7',water:'#dce8eb'};
 const shade=color=>'#'+color.slice(1).match(/../g).map(channel=>Math.round(parseInt(channel,16)*.92).toString(16).padStart(2,'0')).join('');
 // Chinese compass orientation: south above, north below (午 top, 子 bottom).
 const point=(radius,angle)=>[360+radius*Math.sin((direction*angle+180)*Math.PI/180),360-radius*Math.cos((direction*angle+180)*Math.PI/180)];
@@ -55,10 +57,14 @@ function renderWheel(){
     const angle=index*45*direction;
     html+=`<g class="compass-sector" data-compass="${index}"><path d="${sector(337,359,angle,22.5)}" fill="#f2f1ea" stroke="#d9dccf" stroke-width="1"/>${arcLabel(348,angle,compassLabels[index],14,'#92998b',`compass-${index}`,true,20)}</g>`;
   }
+  html+='</g><g class="branch-direction-background" aria-label="พื้นธาตุของ 8 ทิศ">';
+  for(let index=0;index<8;index++){
+    html+=`<path data-direction-element="${directionElements[index]}" data-direction-sector="${index}" d="${sector(114,196,index*45*direction,22.5)}" fill="${directionColors[directionElements[index]]}"/>`;
+  }
   html+='</g>';
   for(let i=0;i<12;i++){
     const b=branches[i],a=i*30;
-    html+=`<g class="branch" data-branch="${i}" tabindex="0" role="button" aria-label="${b.han} ${b.reading} ${b.zodiac} ${b.element} ฤดู${b.season}" aria-pressed="${selected===i}"><path d="${sector(114,196,a)}" fill="${selected===i?selectedColors[b.key]:colors[b.key]}" stroke="#fbfaf6" stroke-width="2"/>`;
+    html+=`<g class="branch" data-branch="${i}" tabindex="0" role="button" aria-label="${b.han} ${b.reading} ${b.zodiac} ${b.element} ฤดู${b.season}" aria-pressed="${selected===i}"><path d="${sector(114,196,a)}" fill="#263b33" fill-opacity="${selected===i?.06:0}" stroke="#fbfaf6" stroke-width="2"/>`;
     html+=arcLabel(155,a,b.han,44,'#2e463c',`branch-han-${i}`,true)+'</g>';
   }
   html+='<circle cx="360" cy="360" r="106" fill="#fbfaf6" stroke="#d4d9c9"/><circle cx="360" cy="360" r="97" fill="none" stroke="#e6e8dc"/>';
