@@ -1,19 +1,34 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=46';
-import {branches,phases,profiles,stemRing,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=46';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=48';
+import {branches,phases,profiles,stemRing,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=48';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
 let mode='phases',birthYear=BIRTH_YEAR,era='BE',cycle=null,selectedYear=birthYear;
 const currentYear=yearNow(new Date());
 let profile='wood', offset=profiles.wood.start, selected=0, practice=false, revealed=false, drag=null, selectedPhase=null;
+const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
 const today=dayPillar(new Date());
-let showStems=true;try{showStems=localStorage.getItem('showStems')!=='0';}catch{}
+let showStems=true,showPhases=true;try{showStems=localStorage.getItem('showStems')!=='0';showPhases=localStorage.getItem('showPhases')!=='0';}catch{}
+// รัศมีวงปรับอัตโนมัติตามวงที่เปิด: ก้านฟ้าชิดวงถัดเข้าไป และ viewBox พอดีวงนอกสุด
+const targetLayout=()=>{const stemIn=showPhases?349:204,extent=showStems?stemIn+49:showPhases?343:200;return {stemIn,extent,stemAlpha:showStems?1:0,phaseAlpha:showPhases?1:0};};
+let layout=targetLayout(),layoutFrame=0;
+function animateLayout(){
+  cancelAnimationFrame(layoutFrame);
+  const from={...layout},to=targetLayout(),duration=reducedMotion.matches?0:420;let began;
+  const frame=time=>{
+    if(began===undefined)began=time;
+    const t=duration?Math.min(1,(time-began)/duration):1,e=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+    for(const key in to)layout[key]=from[key]+(to[key]-from[key])*e;
+    renderWheel();
+    layoutFrame=t<1?requestAnimationFrame(frame):0;
+  };
+  layoutFrame=requestAnimationFrame(frame);
+}
 let stemRotation=pillarShift(today)*30,stemDestination=stemRotation,stemFrame=0;
 const stemColors={wood:'#bfd8b8',fire:'#eebda1',earth:'#e1cf9c',metal:'#d2d6da',water:'#b8d0e4',void:'#eeede8'};
 // พื้นวงกิ่งดินเข้มกว่าสีฤดูของก้นหอยเล็กน้อย
 const branchColors={spring:'#d2e3cf',summer:'#efd2bb',autumn:'#e3d6b4',winter:'#cfdee2'},branchSelectedColors={spring:'#c2d6bd',summer:'#e5c3a7',autumn:'#d6c79f',winter:'#bfd2d8'};
 let rotation=offset*30, destination=rotation, motionFrame=0, dragFrame=0;
-const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
 const colors={spring:'#dfecdd',summer:'#f6dfcc',autumn:'#ece2c6',winter:'#dce8eb'};
 const selectedColors={spring:'#d0dfcc',summer:'#ecd0b7',autumn:'#ded2af',winter:'#cbdde2'};
 // 長生, 帝旺 and 墓 share the element palette of the selected yang stem.
@@ -40,20 +55,11 @@ function arcLabel(radius,angle,text,size,color,id,centered=false,halfAngle=14){
 }
 function renderWheel(){
   const p=profiles[profile];
-  let html='<circle cx="360" cy="360" r="343" fill="#fbfaf6" stroke="#c9cdbb"/><circle cx="360" cy="360" r="309" fill="none" stroke="#d9ddcc"/>';
-  if(showStems){
-  html+='<g class="stem-ring" tabindex="0" role="slider" aria-label="วงก้านฟ้านอกสุด ลากหรือใช้ลูกศรหมุน ก้านหยางล็อกกับกิ่งหยาง ก้านหยินล็อกกับกิ่งหยิน"><circle cx="360" cy="360" r="398" fill="#fbfaf6" stroke="#c9cdbb"/>';
-  stemRing.forEach((s,k)=>{
-    const a=k*30+stemRotation,void_=s.element==='void',isToday=k===today.stem;
-    html+=`<g class="stem" data-stem="${k}"${isToday?' data-today="true"':''}><path d="${sector(349,396,a,14.6)}" fill="${stemColors[s.element]}" stroke="${isToday?'#7d6a45':'#fbfaf6'}" stroke-width="${isToday?3:2}"/>`;
-    if(void_){
-      html+=arcLabel(378,a,s.han,22,'#9ea397',`stem-han-${k}`,true,10);
-      html+=arcLabel(357,a,s.mark,15,'#b9bcb2',`stem-sub-${k}`,true,10);
-    }else html+=arcLabel(370,a,s.han,34,'#2e463c',`stem-han-${k}`,true,8);
-    html+='</g>';
-  });
-  html+='</g>';
-  }
+  const {stemIn,extent,stemAlpha,phaseAlpha}=layout,pad=extent+8;
+  svg.setAttribute('viewBox',`${360-pad} ${360-pad} ${pad*2} ${pad*2}`);
+  let html='<circle cx="360" cy="360" r="200" fill="#fbfaf6" stroke="#c9cdbb"/>',stemHtml='';
+  if(phaseAlpha>.01){
+  html+=`<g class="phase-layer" opacity="${phaseAlpha.toFixed(3)}"${showPhases?'':' aria-hidden="true" pointer-events="none"'}><circle cx="360" cy="360" r="343" fill="#fbfaf6" stroke="#c9cdbb"/><circle cx="360" cy="360" r="309" fill="none" stroke="#d9ddcc"/>`;
   html+='<g class="outer-ring" tabindex="0" role="slider" aria-label="ตำแหน่งวงฉางเซิง ใช้ลูกศรซ้ายหรือขวาหมุนทีละช่อง" aria-valuemin="0" aria-valuemax="11" aria-valuenow="'+offset+'" aria-valuetext="'+(practice?'โหมดท่องจำ':'長生 ตรงกับ '+branches[offset].han+' '+branches[offset].zodiac)+'">';
   for(let i=0;i<12;i++){
     const a=i*30+rotation,show=!practice||(revealed&&wrap(i+offset)===selected);
@@ -69,7 +75,22 @@ function renderWheel(){
     }
     html+='</g>';
   }
-  html+='</g>';
+  html+='</g></g>';
+  }
+  if(stemAlpha>.01){
+  stemHtml+=`<g class="stem-ring" opacity="${stemAlpha.toFixed(3)}"${showStems?' tabindex="0"':' aria-hidden="true"'} role="slider" aria-label="วงก้านฟ้านอกสุด ลากหรือใช้ลูกศรหมุน ก้านหยางล็อกกับกิ่งหยาง ก้านหยินล็อกกับกิ่งหยิน"><circle cx="360" cy="360" r="${stemIn+24}" fill="none" stroke="#fbfaf6" stroke-width="52"/><circle cx="360" cy="360" r="${stemIn+50}" fill="none" stroke="#c9cdbb"/>`;
+  stemRing.forEach((s,k)=>{
+    const a=k*30+stemRotation,void_=s.element==='void',isToday=k===today.stem;
+    stemHtml+=`<g class="stem" data-stem="${k}"${isToday?' data-today="true"':''}><path d="${sector(stemIn,stemIn+47,a,14.6)}" fill="${stemColors[s.element]}" stroke="${isToday?'#7d6a45':'#fbfaf6'}" stroke-width="${isToday?3:2}"/>`;
+    if(void_){
+      stemHtml+=arcLabel(stemIn+29,a,s.han,22,'#9ea397',`stem-han-${k}`,true,10);
+      stemHtml+=arcLabel(stemIn+8,a,s.mark,15,'#b9bcb2',`stem-sub-${k}`,true,10);
+    }else stemHtml+=arcLabel(stemIn+21,a,s.han,34,'#2e463c',`stem-han-${k}`,true,8);
+    stemHtml+='</g>';
+  });
+  stemHtml+='</g>';
+  }
+  html+=stemHtml;
   for(let i=0;i<12;i++){
     const b=branches[i],a=i*30;
     html+=`<g class="branch" data-branch="${i}" tabindex="0" role="button" aria-label="${b.han} ${b.reading} ${b.zodiac} ${b.element} ฤดู${b.season}" aria-pressed="${selected===i}"><path d="${sector(114,196,a)}" fill="${selected===i?branchSelectedColors[b.key]:branchColors[b.key]}" stroke="${showStems&&i===today.branch?'#7d6a45':'#fbfaf6'}" stroke-width="${showStems&&i===today.branch?3:2}"/>`;
@@ -90,14 +111,15 @@ function renderWheel(){
   if(focus!==undefined){const target=focus==='center'?svg.querySelector('[data-center-profile]'):focus==='stem'?svg.querySelector('.stem-ring'):focus==='outer'?svg.querySelector('.outer-ring'):focus.startsWith('phase-')?svg.querySelector(`[data-phase="${focus.slice(6)}"]`):svg.querySelector(`[data-branch="${focus}"]`);target?.focus({preventScroll:true});}
 }
 function renderControls(){
-  svg.setAttribute('viewBox',showStems?'-34 -34 788 788':'8 8 704 704');
-  $('stem-toggle').checked=showStems;
+  $('stem-toggle').checked=showStems;$('phase-toggle').checked=showPhases;
+  for(const id of ['rotation-controls','step-status','alignment','practice-section'])$(id).hidden=!showPhases;
+  $('wheel-caption').style.visibility=showPhases||showStems?'':'hidden';
   $('today-pillar').hidden=!showStems;
   $('today-pillar').textContent=`วันนี้ ${stemRing[today.stem].han}${branches[today.branch].han}`;
   const p=profiles[profile];
   $('alignment').textContent=offset===p.start?p.name+' · ตำแหน่งตามหลัก':'หมุนเอง · '+p.name;
   document.documentElement.style.setProperty('--green',p.color);
-  $('reveal').hidden=!practice;
+  $('reveal').hidden=!practice||!showPhases;
   $('reveal').disabled=revealed;
   $('reveal').textContent=revealed?'เฉลยแล้ว':'เฉลยช่องที่เลือก';
 }
@@ -139,7 +161,13 @@ function chooseBranch(i){selected=i;revealed=false;renderWheel();renderControls(
 function cycleCenterProfile(){profile=nextProfile(profile);alignProfile();svg.querySelector('[data-center-profile]')?.focus({preventScroll:true});}
 $('prev').addEventListener('click',()=>rotate(-1));$('next').addEventListener('click',()=>rotate(1));
 $('reset').addEventListener('click',alignProfile);
-$('stem-toggle').addEventListener('change',e=>{showStems=e.target.checked;try{localStorage.setItem('showStems',showStems?'1':'0');}catch{}renderWheel();renderControls();});
+function toggleRing(key,value){
+  if(key==='showStems')showStems=value;else showPhases=value;
+  try{localStorage.setItem(key,value?'1':'0');}catch{}
+  renderControls();animateLayout();
+}
+$('stem-toggle').addEventListener('change',e=>toggleRing('showStems',e.target.checked));
+$('phase-toggle').addEventListener('change',e=>toggleRing('showPhases',e.target.checked));
 $('practice').addEventListener('change',e=>{practice=e.target.checked;revealed=false;renderWheel();renderControls();});
 $('reveal').addEventListener('click',()=>{revealed=true;renderWheel();renderControls();});
 svg.addEventListener('click',e=>{if(e.target.closest('[data-center-profile]')){cycleCenterProfile();return;}const branch=e.target.closest('[data-branch]');if(branch)chooseBranch(Number(branch.dataset.branch));});
@@ -158,7 +186,7 @@ svg.addEventListener('keydown',e=>{
 });
 function pointerAngle(e){const box=svg.getBoundingClientRect();return Math.atan2(e.clientX-box.left-box.width/2,-(e.clientY-box.top-box.height/2))*180/Math.PI;}
 svg.addEventListener('pointerdown',e=>{
-  const ringName=e.target.closest('.stem-ring')?'stem':e.target.closest('.outer-ring')?'phase':null;
+  const ringName=e.target.closest('.stem-ring')&&showStems?'stem':e.target.closest('.outer-ring')&&showPhases?'phase':null;
   if(!ringName||!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0))return;
   e.preventDefault();cancelMotion();cancelAnimationFrame(stemFrame);stemFrame=0;drag={ring:ringName,id:e.pointerId,last:pointerAngle(e),x:e.clientX,y:e.clientY,moved:false,phase:e.target.closest('[data-phase]')?.dataset.phase};revealed=false;renderControls();svg.setPointerCapture(e.pointerId);svg.classList.add('dragging');$('step-status').textContent='ปล่อยเพื่อลงล็อก';
 });
