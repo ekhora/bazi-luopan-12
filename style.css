@@ -33,3 +33,4 @@ button{transition:transform .08s ease,filter .08s ease}button:not(:disabled):act
 #wheel,#wheel *{-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;outline:none!important}#wheel .stem-ring{touch-action:none;cursor:grab}
 .today-pillar{font-weight:600;color:#7d6a45;margin-right:6px}.today-pillar[hidden]{display:none}
 .rotation-controls[hidden],.step-status[hidden],#alignment[hidden],.settings-section[hidden]{display:none}
+@keyframes today-pulse{0%,100%{opacity:1}50%{opacity:.62}}#wheel .today-pulse{animation:today-pulse 2.6s ease-in-out infinite}@media(prefers-reduced-motion:reduce){#wheel .today-pulse{animation:none}}
