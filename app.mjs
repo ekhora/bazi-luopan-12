@@ -204,9 +204,9 @@ function rotateStem(step){animateStem((stemFrame?stemDestination:Math.round(stem
 function goToday(){
   if(!showStems)return;
   const target=pillarShift(today)*30;
-  // กลับวันนี้หมุนช้ากว่าปกติหนึ่งเท่า (360 ms) ให้ดูคลาสสิก
-  animateStem(stemRotation+angleDelta(target,((stemRotation%360)+360)%360),360);
-  profile=sanheProfile(today.branch);alignProfile(360);
+  // กลับวันนี้หมุนช้ากว่าปกติสี่เท่าของปกติ (720 ms) ให้ดูคลาสสิก
+  animateStem(stemRotation+angleDelta(target,((stemRotation%360)+360)%360),720);
+  profile=sanheProfile(today.branch);alignProfile(720);
 }
 function alignProfile(ms){const target=profiles[profile].start*30;animateTo(rotation+angleDelta(target,((rotation%360)+360)%360),ms);}
 function choosePhase(i){selectedPhase=i;if(practice){selected=wrap(i+offset);revealed=false;}renderWheel();renderControls();svg.querySelector(`[data-phase="${i}"]`)?.focus({preventScroll:true});}
