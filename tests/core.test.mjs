@@ -67,3 +67,10 @@ test('ซาฮะของกิ่งดินวันนี้ชี้ต�
   assert.equal(name(new Date('2026-10-14T12:00:00+07:00')),'辛酉:metal');
   assert.equal(name(new Date('2026-10-15T12:00:00+07:00')),'壬戌:fire');
 });
+
+test('ตัดวันใหม่ตอน 23:00 เวลาไทย (ยามจื่อ)',()=>{
+  const name=d=>{const p=dayPillar(new Date(d));return stemRing[p.stem].han+branches[p.branch].han;};
+  assert.equal(name('2026-10-14T22:59:00+07:00'),'辛酉');
+  assert.equal(name('2026-10-14T23:00:00+07:00'),'壬戌');
+  assert.equal(name('2026-10-15T00:30:00+07:00'),'壬戌');
+});

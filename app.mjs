@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=57';
-import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=57';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=58';
+import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=58';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -7,7 +7,7 @@ let mode='phases',birthYear=BIRTH_YEAR,era='BE',cycle=null,selectedYear=birthYea
 const currentYear=yearNow(new Date());
 let profile='wood', offset=0, selected=0, practice=false, revealed=false, drag=null, selectedPhase=null;
 const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
-const today=dayPillar(new Date());
+let today=dayPillar(new Date());
 // ตอนโหลด หมุนวง 12 วัฏจักรไปยังซาฮะของกิ่งดินวันนี้ ให้ลูกศรชี้ตี้วั่งของธาตุนั้น
 profile=sanheProfile(today.branch);offset=profiles[profile].start;
 let showStems=true,showPhases=true;try{showStems=localStorage.getItem('showStems')!=='0';showPhases=localStorage.getItem('showPhases')!=='0';}catch{}
@@ -202,6 +202,15 @@ function toggleRing(key,value){
   renderControls();animateLayout();
 }
 $('today-pillar').addEventListener('click',goToday);
+// ถึงเวลาตัดวัน (23:00) ระหว่างเปิดค้าง: อัปเดตเสาวันเอง ถ้าวงอยู่ที่วันเดิมให้หมุนตามไปวันใหม่
+function checkDayChange(){
+  const next=dayPillar(new Date());if(next.index===today.index)return;
+  const wasAligned=wrap(Math.round(stemRotation/30))===pillarShift(today)&&!drag;
+  today=next;renderControls();
+  if(wasAligned&&showStems)goToday();else renderWheel();
+}
+setInterval(checkDayChange,30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkDayChange();});
 $('stem-toggle').addEventListener('change',e=>toggleRing('showStems',e.target.checked));
 $('phase-toggle').addEventListener('change',e=>toggleRing('showPhases',e.target.checked));
 $('practice').addEventListener('change',e=>{practice=e.target.checked;revealed=false;renderWheel();renderControls();});
