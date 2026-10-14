@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=66';
-import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=66';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=67';
+import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=67';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -158,7 +158,7 @@ function renderWheel(){
 }
 function renderControls(){
   $('stem-toggle').checked=showStems;$('phase-toggle').checked=showPhases;
-  for(const id of ['rotation-controls','step-status','practice-section','season-legend'])$(id).hidden=!showPhases;
+  for(const id of ['rotation-controls','step-status','practice-section'])$(id).hidden=!showPhases;
   $('today-pillar').hidden=!showStems;
   $('today-pillar').textContent=`◎ วันนี้ ${stemRing[today.stem].han}${branches[today.branch].han}`;
   const p=profiles[profile];
