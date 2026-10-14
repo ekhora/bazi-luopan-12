@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=52';
-import {branches,phases,profiles,stemRing,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=52';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=53';
+import {branches,phases,profiles,stemRing,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=53';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -94,11 +94,13 @@ function renderWheel(){
   // เน้นเสาวันเฉพาะเมื่อวงก้านฟ้าอยู่ตำแหน่งของวันนี้ (หมุนออกแล้วไม่เน้น)
   const stemShift=wrap(Math.round(stemRotation/30)),isVoid=i=>showStems&&stemAtBranch(i,stemShift).element==='void';
   const todayAligned=showStems&&wrap(Math.round(stemRotation/30))===pillarShift(today);
+  // ชีพจรเบาๆ ของช่องวันนี้: หน่วงเวลาติดลบตามนาฬิกาเพื่อให้จังหวะต่อเนื่องแม้วาดวงใหม่
+  const todayPulse=` class="today-pulse" style="animation-delay:-${Math.round(performance.now()%2600)}ms"`;
   if(stemAlpha>.01){
   stemHtml+=`<g class="stem-ring" opacity="${stemAlpha.toFixed(3)}"${showStems?' tabindex="0"':' aria-hidden="true"'} role="slider" aria-label="วงก้านฟ้านอกสุด ลากหรือใช้ลูกศรหมุน ก้านหยางล็อกกับกิ่งหยาง ก้านหยินล็อกกับกิ่งหยิน"><circle cx="360" cy="360" r="${stemIn+24}" fill="none" stroke="#fbfaf6" stroke-width="52"/><circle cx="360" cy="360" r="${stemIn+50}" fill="none" stroke="#c9cdbb"/>`;
   stemRing.forEach((s,k)=>{
     const a=k*30+stemRotation,void_=s.element==='void',isToday=todayAligned&&k===today.stem;
-    stemHtml+=`<g class="stem" data-stem="${k}"${isToday?' data-today="true"':''}><path d="${sector(stemIn,stemIn+47,a,14.6)}" fill="${isToday?(s.element==='metal'?'#b3bdc8':vivid(stemColors[s.element])):stemColors[s.element]}" stroke="#fbfaf6" stroke-width="2"/>`;
+    stemHtml+=`<g class="stem" data-stem="${k}"${isToday?' data-today="true"':''}><path${isToday?todayPulse:''} d="${sector(stemIn,stemIn+47,a,14.6)}" fill="${isToday?(s.element==='metal'?'#b3bdc8':vivid(stemColors[s.element])):stemColors[s.element]}" stroke="#fbfaf6" stroke-width="2"/>`;
     if(void_){
       stemHtml+=arcLabel(stemIn+29,a,s.han,22,'#9ea397',`stem-han-${k}`,true,10);
       stemHtml+=arcLabel(stemIn+8,a,s.mark,15,'#b9bcb2',`stem-sub-${k}`,true,10);
@@ -114,7 +116,7 @@ function renderWheel(){
   };
   for(let i=0;i<12;i++){
     const b=branches[i],a=i*30;
-    html+=`<g class="branch" data-branch="${i}" tabindex="0" role="button" aria-label="${b.han} ${b.reading} ${b.zodiac} ${b.element} ฤดู${b.season}" aria-pressed="${selected===i}"><path d="${sector(114,196,a)}" fill="${branchFill(i)}" stroke="#fbfaf6" stroke-width="2"/>`;
+    html+=`<g class="branch" data-branch="${i}" tabindex="0" role="button" aria-label="${b.han} ${b.reading} ${b.zodiac} ${b.element} ฤดู${b.season}" aria-pressed="${selected===i}"><path${todayAligned&&i===today.branch&&!isVoid(i)?todayPulse:''} d="${sector(114,196,a)}" fill="${branchFill(i)}" stroke="#fbfaf6" stroke-width="2"/>`;
     html+=arcLabel(155,a,b.han,44,isVoid(i)?'#a7ada2':'#2e463c',`branch-han-${i}`,true)+'</g>';
   }
   html+='<circle cx="360" cy="360" r="106" fill="#fbfaf6"/><g class="center-direction-band" aria-label="แถบ 8 ธาตุทิศระหว่างเส้นวงกลมรอบศูนย์กลาง">';
