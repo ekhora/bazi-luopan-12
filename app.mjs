@@ -65,7 +65,7 @@ function renderWheel(){
   }
   html+='<circle cx="360" cy="360" r="106" fill="#fbfaf6"/><g class="center-direction-band" aria-label="แถบ 8 ธาตุทิศระหว่างเส้นวงกลมรอบศูนย์กลาง">';
   for(let index=0;index<8;index++){
-    html+=`<path data-direction-element="${directionElements[index]}" data-direction-sector="${index}" d="${sector(97,106,index*45*direction,22.5)}" fill="${directionColors[directionElements[index]]}"/>`;
+    html+=`<path data-direction-element="${directionElements[index]}" data-direction-sector="${index}" d="${sector(97,106,index*45*direction,20)}" fill="${directionColors[directionElements[index]]}"/>`;
   }
   html+='</g><circle cx="360" cy="360" r="106" fill="none" stroke="#d4d9c9"/><circle cx="360" cy="360" r="97" fill="none" stroke="#e6e8dc"/>';
   const peak=profilePeakBranch(profile),next=profiles[nextProfile(profile)];
