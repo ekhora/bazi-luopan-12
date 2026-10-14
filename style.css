@@ -34,3 +34,4 @@ button{transition:transform .08s ease,filter .08s ease}button:not(:disabled):act
 .today-pillar{font:inherit;font-weight:600;color:#7d6a45;margin-right:6px;padding:4px 12px;min-height:32px;border:1px solid #e3d6b4;border-radius:999px;background:#fbf6e8;cursor:pointer}.today-pillar[hidden]{display:none}
 .rotation-controls[hidden],.step-status[hidden],#alignment[hidden],.settings-section[hidden]{display:none}
 @keyframes today-pulse{0%,100%{opacity:1}50%{opacity:.62}}#wheel .today-pulse{animation:today-pulse 2.6s ease-in-out infinite}@media(prefers-reduced-motion:reduce){#wheel .today-pulse{animation:none}}
+footer{flex-wrap:wrap;row-gap:6px}footer .copyright{flex-basis:100%;margin:0;text-align:center;font-size:11px;color:#8a8f84;letter-spacing:.02em}
