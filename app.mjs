@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=50';
-import {branches,phases,profiles,stemRing,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=50';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=51';
+import {branches,phases,profiles,stemRing,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=51';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -111,10 +111,15 @@ function renderWheel(){
     html+=`<path data-direction-element="${directionElements[index]}" data-direction-sector="${index}" d="${sector(97,106,index*45*direction,20)}" fill="${directionColors[directionElements[index]]}"/>`;
   }
   html+='</g><circle cx="360" cy="360" r="106" fill="none" stroke="#d4d9c9"/><circle cx="360" cy="360" r="97" fill="none" stroke="#e6e8dc"/>';
+  // ปุ่มธาตุกลางวงและลูกศรใช้กับวง 12 วัฏจักร จึงจางหายไปพร้อมกัน
+  if(phaseAlpha>.01){
+  html+=`<g class="center-layer" opacity="${phaseAlpha.toFixed(3)}"${showPhases?'':' aria-hidden="true" pointer-events="none"'}>`;
   const peak=profilePeakBranch(profile),next=profiles[nextProfile(profile)];
   html+=`<path class="element-pointer" data-pointer-branch="${branches[peak].han}" aria-label="${p.name} ชี้ ${branches[peak].han}" d="M360 278 L353 296 L360 290 L367 296Z" transform="rotate(${direction*peak*30+180} 360 360)" fill="${p.color}"/>`;
-  html+=`<g class="center-profile" data-center-profile="${profile}" tabindex="0" role="button" aria-label="${p.han} ${p.reading} ${p.name} แตะเพื่อเปลี่ยนเป็น ${next.han} ${next.name}"><circle cx="360" cy="345" r="54" fill="transparent"/>${label(0,0,p.han,48,p.color,-24)}</g>`;
+  html+=`<g class="center-profile" data-center-profile="${profile}" ${showPhases?'tabindex="0" ':''}role="button" aria-label="${p.han} ${p.reading} ${p.name} แตะเพื่อเปลี่ยนเป็น ${next.han} ${next.name}"><circle cx="360" cy="345" r="54" fill="transparent"/>${label(0,0,p.han,48,p.color,-24)}</g>`;
   html+=label(0,0,p.name,20,'#34483b',20)+label(0,0,'12 กิ่งดิน',16,'#87907c',51);
+  html+='</g>';
+  }
   const active=document.activeElement;
   const focus=active?.closest('[data-center-profile]')?'center':active?.dataset.phase!==undefined?'phase-'+active.dataset.phase:active?.closest('.stem-ring')?'stem':active?.closest('.outer-ring')?'outer':active?.dataset.branch;
   svg.innerHTML=html;
@@ -180,7 +185,7 @@ $('stem-toggle').addEventListener('change',e=>toggleRing('showStems',e.target.ch
 $('phase-toggle').addEventListener('change',e=>toggleRing('showPhases',e.target.checked));
 $('practice').addEventListener('change',e=>{practice=e.target.checked;revealed=false;renderWheel();renderControls();});
 $('reveal').addEventListener('click',()=>{revealed=true;renderWheel();renderControls();});
-svg.addEventListener('click',e=>{if(e.target.closest('[data-center-profile]')){cycleCenterProfile();return;}const branch=e.target.closest('[data-branch]');if(branch)chooseBranch(Number(branch.dataset.branch));});
+svg.addEventListener('click',e=>{if(e.target.closest('[data-center-profile]')){if(showPhases)cycleCenterProfile();return;}const branch=e.target.closest('[data-branch]');if(branch)chooseBranch(Number(branch.dataset.branch));});
 svg.addEventListener('keydown',e=>{
   if(e.target.closest('[data-center-profile]')&&(e.key==='Enter'||e.key===' ')){e.preventDefault();cycleCenterProfile();return;}
   const phase=e.target.closest('[data-phase]');
