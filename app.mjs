@@ -16,23 +16,23 @@ const highlightedPhases=new Set([0,4,8]);
 const shade=color=>'#'+color.slice(1).match(/../g).map(channel=>Math.round(parseInt(channel,16)*.92).toString(16).padStart(2,'0')).join('');
 // Chinese compass orientation: south above, north below (午 top, 子 bottom).
 const point=(radius,angle)=>[360+radius*Math.sin((direction*angle+180)*Math.PI/180),360-radius*Math.cos((direction*angle+180)*Math.PI/180)];
-const sector=(inner,outer,angle)=>{
-  const a=point(outer,angle-15),b=point(outer,angle+15),c=point(inner,angle+15),d=point(inner,angle-15);
+const sector=(inner,outer,angle,halfAngle=15)=>{
+  const a=point(outer,angle-halfAngle),b=point(outer,angle+halfAngle),c=point(inner,angle+halfAngle),d=point(inner,angle-halfAngle);
   return `M ${a} A ${outer} ${outer} 0 0 ${direction===1?1:0} ${b} L ${c} A ${inner} ${inner} 0 0 ${direction===1?0:1} ${d} Z`;
 };
 const label=(radius,angle,text,size,color='#263b33',dy=0)=>{const [x,y]=point(radius,angle);return `<text x="${x}" y="${y+dy}" text-anchor="middle" dominant-baseline="middle" font-size="${size}" fill="${color}">${text}</text>`};
 const phaseDescriptions=['เริ่มต้นชีวิต','ชำระและเรียนรู้','เติบโต รับผิดชอบ','ตั้งหลัก สร้างตัว','รุ่งเรืองสูงสุด','กำลังเริ่มลดลง','อ่อนแรง ต้องพัก','สิ้นสุดระยะเดิม','เก็บงำพลัง','พลังเก่าขาดสิ้น','ก่อตัวในครรภ์','ฟูมฟักก่อนเกิด'];
-function arcLabel(radius,angle,text,size,color,id,centered=false){
+function arcLabel(radius,angle,text,size,color,id,centered=false,halfAngle=14){
   const screenAngle=((direction*angle+180)%360+360)%360;
   const reverse=screenAngle>90&&screenAngle<270;
   if(centered)radius+=(reverse?1:-1)*size*.35;
-  const start=point(radius,angle+(reverse?14:-14)*direction);
-  const end=point(radius,angle+(reverse?-14:14)*direction);
+  const start=point(radius,angle+(reverse?halfAngle:-halfAngle)*direction);
+  const end=point(radius,angle+(reverse?-halfAngle:halfAngle)*direction);
   return `<defs><path id="${id}" d="M ${start} A ${radius} ${radius} 0 0 ${reverse?0:1} ${end}"/></defs><text text-anchor="middle" font-size="${size}" fill="${color}"><textPath href="#${id}" startOffset="50%">${text}</textPath></text>`;
 }
 function renderWheel(){
   const p=profiles[profile];
-  let html='<circle cx="360" cy="360" r="343" fill="#fbfaf6" stroke="#c9cdbb"/><circle cx="360" cy="360" r="309" fill="none" stroke="#d9ddcc"/>';
+  let html='<circle cx="360" cy="360" r="361" fill="#fbfaf6" stroke="#c9cdbb"/><circle cx="360" cy="360" r="309" fill="none" stroke="#d9ddcc"/>';
   html+='<g class="outer-ring" tabindex="0" role="slider" aria-label="ตำแหน่งวงฉางเซิง ใช้ลูกศรซ้ายหรือขวาหมุนทีละช่อง" aria-valuemin="0" aria-valuemax="11" aria-valuenow="'+offset+'" aria-valuetext="'+(practice?'โหมดท่องจำ':'長生 ตรงกับ '+branches[offset].han+' '+branches[offset].zodiac)+'">';
   for(let i=0;i<12;i++){
     const a=i*30+rotation,show=!practice||(revealed&&wrap(i+offset)===selected);
@@ -47,6 +47,13 @@ function renderWheel(){
       html+=arcLabel(324,a,'· · ·',16,'#a9ada3',`meaning-${i}`,true);
     }
     html+='</g>';
+  }
+  html+='</g>';
+  const compassLabels=['เหนือ','ตะวันออกเฉียงเหนือ','ตะวันออก','ตะวันออกเฉียงใต้','ใต้','ตะวันตกเฉียงใต้','ตะวันตก','ตะวันตกเฉียงเหนือ'];
+  html+='<g class="compass-ring" aria-label="8 ทิศ เหนืออยู่ล่าง ใต้อยู่บน">';
+  for(let index=0;index<8;index++){
+    const angle=index*45*direction;
+    html+=`<g class="compass-sector" data-compass="${index}"><path d="${sector(337,359,angle,22.5)}" fill="#f2f1ea" stroke="#d9dccf" stroke-width="1"/>${arcLabel(348,angle,compassLabels[index],14,'#92998b',`compass-${index}`,true,20)}</g>`;
   }
   html+='</g>';
   for(let i=0;i<12;i++){
