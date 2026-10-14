@@ -38,3 +38,12 @@ export const stemRing = [
 // หมุนทีละ 60° เท่านั้น เพื่อให้ช่องหยางทับกิ่งดินหยางและช่องหยินทับกิ่งดินหยิน (กิ่ง index คู่ = หยาง)
 export const snapStem = degrees => wrap(Math.round(degrees / 60) * 2);
 export const stemAtBranch = (branchIndex, shift) => stemRing[wrap(branchIndex - shift)];
+// เสาวัน (日柱) ตามวันที่ปฏิทินเวลาไทย: ลำดับ 0 = 甲子, อ้างอิง 2000-01-01 = 戊午
+export function dayPillar(date){
+  const [y,m,d]=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'}).format(date).split('-').map(Number);
+  const days=Math.round((Date.UTC(y,m-1,d)-Date.UTC(2000,0,1))/864e5);
+  const index=((days+54)%60+60)%60;
+  return {index,stem:index%10,branch:index%12};
+}
+// จำนวนช่องที่ต้องเลื่อนวงก้านฟ้าเพื่อให้ก้านของเสาวันทับกิ่งของเสาวัน
+export const pillarShift = pillar => wrap(pillar.branch - pillar.stem);

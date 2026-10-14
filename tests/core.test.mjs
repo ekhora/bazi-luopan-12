@@ -43,3 +43,15 @@ test('วงก้านฟ้ามี 10 ก้าน + 空亡陽/陰 แล�
   }
   assert.equal(stemAtBranch(0,0).han,'甲');assert.equal(stemAtBranch(10,0).mark,'陽');assert.equal(stemAtBranch(11,0).mark,'陰');
 });
+
+import {dayPillar,pillarShift} from '../core.mjs';
+test('เสาวันตรงปฏิทินจีนและวงก้านฟ้าหมุนให้ก้านทับกิ่งของวัน',()=>{
+  const name=p=>stemRing[p.stem].han+branches[p.branch].han;
+  assert.equal(name(dayPillar(new Date('2000-01-01T12:00:00+07:00'))),'戊午');
+  assert.equal(name(dayPillar(new Date('2024-02-10T12:00:00+07:00'))),'甲辰');
+  assert.equal(name(dayPillar(new Date('1949-10-01T12:00:00+07:00'))),'甲子');
+  for(let n=0;n<60;n++){
+    const p=dayPillar(new Date(Date.UTC(2026,0,1+n,5)));
+    assert.equal(stemAtBranch(p.branch,pillarShift(p)),stemRing[p.stem]);assert.equal(pillarShift(p)%2,0);
+  }
+});
