@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=68';
-import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=68';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=69';
+import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=69';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -57,7 +57,7 @@ const vivid=color=>{
 const shade=color=>'#'+color.slice(1).match(/../g).map(channel=>Math.round(parseInt(channel,16)*.92).toString(16).padStart(2,'0')).join('');
 // Chinese compass orientation: south above, north below (午 top, 子 bottom).
 // viewOffset: มุมหมุนทั้งวงแบบยกชุด (ใช้เฉพาะตอนวาดวงหลัก ก้นหอยไม่หมุนตาม)
-let viewRotation=0,viewOffset=0,viewFrame=0;
+let viewRotation=0,viewOffset=0,viewFrame=0,viewTarget=0;
 const point=(radius,angle)=>[360+radius*Math.sin((direction*angle+180+viewOffset)*Math.PI/180),360-radius*Math.cos((direction*angle+180+viewOffset)*Math.PI/180)];
 const sector=(inner,outer,angle,halfAngle=15)=>{
   const a=point(outer,angle-halfAngle),b=point(outer,angle+halfAngle),c=point(inner,angle+halfAngle),d=point(inner,angle-halfAngle);
@@ -362,9 +362,10 @@ $('cycle-all').addEventListener('click',()=>chooseCycle(cycle===null?Math.floor(
 $('cycle-select').addEventListener('change',e=>chooseCycle(e.target.value==='all'?null:Number(e.target.value)));
 
 // หมุนทั้งวง 90° ตามทิศทางที่เลือกใน Settings (ตามเข็ม +90°, ทวนเข็ม −90°)
-function spinView(){
+function spinView(sign=1){
   cancelAnimationFrame(viewFrame);
-  const start=viewRotation,target=Math.round(viewRotation/90)*90+direction*90,duration=reducedMotion.matches?0:380;let began;
+  // กดซ้อนระหว่างหมุน: ต่อจากเป้าหมายเดิม ไม่ปัดกลับ
+  const start=viewRotation,target=(viewFrame?viewTarget:Math.round(viewRotation/90)*90)+sign*direction*90;viewTarget=target;const duration=reducedMotion.matches?0:380;let began;
   const frame=time=>{
     if(began===undefined)began=time;
     const t=duration?Math.min(1,(time-began)/duration):1,e=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
@@ -373,7 +374,8 @@ function spinView(){
   };
   viewFrame=requestAnimationFrame(frame);
 }
-$('spin-view').addEventListener('click',spinView);
+$('spin-view').addEventListener('click',()=>spinView(1));
+$('spin-back').addEventListener('click',()=>spinView(-1));
 function setDirection(value){
   if(drag){const pointer=drag.id;drag=null;svg.classList.remove('dragging');if(svg.hasPointerCapture(pointer))svg.releasePointerCapture(pointer);}
   cancelMotion();rotation=destination=offset*30;direction=value;
@@ -381,6 +383,7 @@ function setDirection(value){
   $('direction-ccw').setAttribute('aria-pressed',String(direction===-1));
   renderWheel();renderControls();if(mode==='years')renderSpiral();
   $('spin-view').textContent=direction===1?'↻':'↺';$('spin-view').setAttribute('aria-label',`หมุนทั้งวง 90° ${direction===1?'ตาม':'ทวน'}เข็มนาฬิกา`);
+  $('spin-back').textContent=direction===1?'↺':'↻';$('spin-back').setAttribute('aria-label',`หมุนทั้งวงกลับ 90° ${direction===1?'ทวน':'ตาม'}เข็มนาฬิกา`);
 }
 $('direction-cw').addEventListener('click',()=>setDirection(1));
 $('direction-ccw').addEventListener('click',()=>setDirection(-1));
