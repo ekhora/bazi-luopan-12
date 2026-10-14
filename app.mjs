@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=54';
-import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=54';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=55';
+import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=55';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -145,7 +145,7 @@ function renderControls(){
   for(const id of ['rotation-controls','step-status','alignment','practice-section'])$(id).hidden=!showPhases;
   $('wheel-caption').style.visibility=showPhases||showStems?'':'hidden';
   $('today-pillar').hidden=!showStems;
-  $('today-pillar').textContent=`วันนี้ ${stemRing[today.stem].han}${branches[today.branch].han}`;
+  $('today-pillar').textContent=`◎ วันนี้ ${stemRing[today.stem].han}${branches[today.branch].han}`;
   const p=profiles[profile];
   $('alignment').textContent=offset===p.start?p.name+' · ตำแหน่งตามหลัก':'หมุนเอง · '+p.name;
   document.documentElement.style.setProperty('--green',p.color);
@@ -185,6 +185,13 @@ function animateStem(target){
 }
 const lockStem=()=>animateStem(Math.round(stemRotation/60)*60);
 function rotateStem(step){animateStem((stemFrame?stemDestination:Math.round(stemRotation/60)*60)+step*direction*60);}
+// ปุ่มวันนี้: หมุนวงก้านฟ้ากลับไปเสาวันนี้ (ทางที่สั้นที่สุด) และตั้งซาฮะของวันใหม่
+function goToday(){
+  if(!showStems)return;
+  const target=pillarShift(today)*30;
+  animateStem(stemRotation+angleDelta(target,((stemRotation%360)+360)%360));
+  profile=sanheProfile(today.branch);alignProfile();
+}
 function alignProfile(){const target=profiles[profile].start*30;animateTo(rotation+angleDelta(target,((rotation%360)+360)%360));}
 function choosePhase(i){selectedPhase=i;if(practice){selected=wrap(i+offset);revealed=false;}renderWheel();renderControls();svg.querySelector(`[data-phase="${i}"]`)?.focus({preventScroll:true});}
 function chooseBranch(i){selected=i;revealed=false;renderWheel();renderControls();svg.querySelector(`[data-branch="${i}"]`)?.focus({preventScroll:true});}
@@ -196,6 +203,7 @@ function toggleRing(key,value){
   try{localStorage.setItem(key,value?'1':'0');}catch{}
   renderControls();animateLayout();
 }
+$('today-pillar').addEventListener('click',goToday);
 $('stem-toggle').addEventListener('change',e=>toggleRing('showStems',e.target.checked));
 $('phase-toggle').addEventListener('change',e=>toggleRing('showPhases',e.target.checked));
 $('practice').addEventListener('change',e=>{practice=e.target.checked;revealed=false;renderWheel();renderControls();});
