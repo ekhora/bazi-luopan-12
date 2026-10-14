@@ -6,12 +6,12 @@
   <meta name="description" content="วงล้อ 12 กิ่งดินสำหรับมือถือ หมุนฉางเซิงตามนิ้วและลงล็อกเมื่อปล่อย สำหรับฝึกท่องจำปาจื้อ">
   <title>วงล้อฉางเซิง · 12 กิ่งดิน</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=61">
+  <link rel="stylesheet" href="./style.css?v=62">
   <script>
     // แสดงข้อผิดพลาดบนหน้าเว็บ หากโมดูลโหลดไม่ผ่าน (ช่วยวินิจฉัยบนมือถือ)
     addEventListener('error',e=>{const el=document.getElementById('step-status');if(el)el.textContent='เกิดข้อผิดพลาด: '+(e.message||e.target?.src||'โหลดไฟล์ไม่สำเร็จ')+' · ลองรีเฟรช';},true);
   </script>
-  <script type="module" src="./app.mjs?v=61"></script>
+  <script type="module" src="./app.mjs?v=62"></script>
 </head>
 <body>
   <header><a class="brand" href="./"><span class="brand-icon">十二</span><h1>วงล้อฉางเซิง<small>12 กิ่งดิน · สือเอ้อร์ฉางเซิง</small></h1></a><button id="settings-open" class="settings-button" aria-label="ตั้งค่า" aria-haspopup="dialog" title="ตั้งค่า">⚙</button></header>
@@ -22,7 +22,7 @@
       <button type="button" id="spin-view" class="spin-view" aria-label="หมุนทั้งวง 90° ตามเข็มนาฬิกา">↻</button>
       <button type="button" id="today-pillar" class="today-pillar" aria-label="กลับไปเสาวันนี้"></button>
       <svg id="wheel" viewBox="-34 -34 788 788" role="group" aria-label="วงล้อ 12 กิ่งดิน ลากวงนอกเพื่อหมุน ปล่อยเพื่อลงล็อก"></svg>
-      <div class="seasons" aria-label="สีฤดูกาล"><span class="spring">ใบไม้ผลิ</span><span class="summer">ร้อน</span><span class="autumn">ใบไม้ร่วง</span><span class="winter">หนาว</span></div>
+      <div class="seasons" aria-label="สีฤดูกาล"><span class="spring" aria-label="ใบไม้ผลิ">春 ชุน</span><span class="summer" aria-label="ร้อน">夏 เซี่ย</span><span class="autumn" aria-label="ใบไม้ร่วง">秋 ชิว</span><span class="winter" aria-label="หนาว">冬 ตง</span></div>
       <div id="rotation-controls" class="rotation-controls"><button id="prev" aria-label="หมุนวงนอกทวนเข็มหนึ่งช่อง">↶ ย้อน</button><button id="reset" aria-label="กลับตำแหน่งของธาตุที่เลือก">↺ กลับตำแหน่ง</button><button id="next" aria-label="หมุนวงนอกตามเข็มหนึ่งช่อง">ถัดไป ↷</button></div>
       <p id="step-status" class="step-status" aria-live="polite">ลากเพื่อหมุน · ปล่อยเพื่อลงล็อก</p>
     </section>

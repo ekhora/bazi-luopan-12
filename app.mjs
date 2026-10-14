@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=61';
-import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=61';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=62';
+import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=62';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
