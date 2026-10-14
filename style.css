@@ -38,3 +38,4 @@ footer{flex-wrap:wrap;row-gap:6px}footer .copyright{flex-basis:100%;margin:0;tex
 .spin-view{position:absolute;top:0;right:0;z-index:2;width:34px;height:34px;min-height:34px;padding:0;font-size:19px;line-height:1;color:#7d6a45;border:1px solid #e3d6b4;border-radius:50%;background:#fbf6e8;box-shadow:0 1px 3px rgba(60,50,20,.08);cursor:pointer;display:grid;place-items:center}
 /* Settings แสดงเฉพาะส่วนของโหมดที่เปิดอยู่ ทิศทางของวงใช้ร่วมกัน */
 #settings-dialog[data-mode=years] [data-for=phases],#settings-dialog[data-mode=phases] [data-for=years]{display:none!important}
+.seasons[hidden]{display:none}

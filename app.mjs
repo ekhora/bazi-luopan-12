@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=64';
-import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=64';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=65';
+import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=65';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -132,6 +132,16 @@ function renderWheel(){
     html+=`<path data-direction-element="${directionElements[index]}" data-direction-sector="${index}" d="${sector(97,106,index*45*direction,20)}" fill="${directionColors[directionElements[index]]}"/>`;
   }
   html+='</g><circle cx="360" cy="360" r="106" fill="none" stroke="#d4d9c9"/><circle cx="360" cy="360" r="97" fill="none" stroke="#e6e8dc"/>';
+  // ปิดวง 12 วัฏจักร: แสดงวง 4 ฤดูด้านใน (春 寅卯辰, 夏 巳午未, 秋 申酉戌, 冬 亥子丑) เว้นวงว่างตรงศูนย์กลาง
+  if(phaseAlpha<.99){
+    html+=`<g class="season-ring" opacity="${(1-phaseAlpha).toFixed(3)}" aria-label="วง 4 ฤดู" pointer-events="none">`;
+    [['spring','春','ชุน',90],['summer','夏','เซี่ย',180],['autumn','秋','ชิว',270],['winter','冬','ตง',0]].forEach(([key,han,reading,angle])=>{
+      html+=`<path d="${sector(44,93,angle,44)}" fill="${branchColors[key]}" stroke="#fbfaf6" stroke-width="2"/>`;
+      html+=halo(arcLabel(75,angle,han,24,'#2e463c',`season-han-${key}`,true,30),5);
+      html+=arcLabel(55,angle,reading,12,'#65745f',`season-thai-${key}`,true,30);
+    });
+    html+='<circle cx="360" cy="360" r="42" fill="#fbfaf6" stroke="#e6e8dc"/></g>';
+  }
   // ปุ่มธาตุกลางวงและลูกศรใช้กับวง 12 วัฏจักร จึงจางหายไปพร้อมกัน
   if(phaseAlpha>.01){
   html+=`<g class="center-layer" opacity="${phaseAlpha.toFixed(3)}"${showPhases?'':' aria-hidden="true" pointer-events="none"'}>`;
@@ -149,7 +159,7 @@ function renderWheel(){
 }
 function renderControls(){
   $('stem-toggle').checked=showStems;$('phase-toggle').checked=showPhases;
-  for(const id of ['rotation-controls','step-status','practice-section'])$(id).hidden=!showPhases;
+  for(const id of ['rotation-controls','step-status','practice-section','season-legend'])$(id).hidden=!showPhases;
   $('today-pillar').hidden=!showStems;
   $('today-pillar').textContent=`◎ วันนี้ ${stemRing[today.stem].han}${branches[today.branch].han}`;
   const p=profiles[profile];
@@ -194,9 +204,9 @@ function rotateStem(step){animateStem((stemFrame?stemDestination:Math.round(stem
 function goToday(){
   if(!showStems)return;
   const target=pillarShift(today)*30;
-  // กลับวันนี้หมุนช้ากว่าปกติหนึ่งเท่า (360 ms) ให้ดูคลาสสิก
-  animateStem(stemRotation+angleDelta(target,((stemRotation%360)+360)%360),360);
-  profile=sanheProfile(today.branch);alignProfile(360);
+  // กลับวันนี้หมุนช้า (720 ms) ให้ดูคลาสสิก
+  animateStem(stemRotation+angleDelta(target,((stemRotation%360)+360)%360),720);
+  profile=sanheProfile(today.branch);alignProfile(720);
 }
 function alignProfile(ms){const target=profiles[profile].start*30;animateTo(rotation+angleDelta(target,((rotation%360)+360)%360),ms);}
 function choosePhase(i){selectedPhase=i;if(practice){selected=wrap(i+offset);revealed=false;}renderWheel();renderControls();svg.querySelector(`[data-phase="${i}"]`)?.focus({preventScroll:true});}
