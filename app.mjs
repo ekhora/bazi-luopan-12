@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=63';
-import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=63';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=64';
+import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=64';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -111,7 +111,7 @@ function renderWheel(){
     if(void_){
       stemHtml+=halo(arcLabel(stemIn+29,a,s.han,22,'#9ea397',`stem-han-${k}`,true,10),2);
       stemHtml+=halo(arcLabel(stemIn+8,a,s.mark,15,'#b9bcb2',`stem-sub-${k}`,true,10),2);
-    }else{const text=arcLabel(stemIn+21,a,s.han,34,'#2e463c',`stem-han-${k}`,true,8);stemHtml+=halo(text,isToday?6:2.5);}
+    }else{const text=arcLabel(stemIn+21,a,s.han,34,'#2e463c',`stem-han-${k}`,true,8);stemHtml+=halo(text,isToday?8:6);}
     stemHtml+='</g>';
   });
   stemHtml+='</g>';
@@ -125,7 +125,7 @@ function renderWheel(){
     const b=branches[i],a=i*30;
     html+=`<g class="branch" data-branch="${i}" tabindex="0" role="button" aria-label="${b.han} ${b.reading} ${b.zodiac} ${b.element} ฤดู${b.season}" aria-pressed="${selected===i}"><path${todayAligned&&i===today.branch&&!isVoid(i)?todayPulse:''} d="${sector(114,196,a)}" fill="${branchFill(i)}" stroke="#fbfaf6" stroke-width="2"/>`;
     const branchText=arcLabel(155,a,b.han,44,isVoid(i)?'#a7ada2':'#2e463c',`branch-han-${i}`,true);
-    html+=halo(branchText,todayAligned&&i===today.branch&&!isVoid(i)?6.5:2.5)+'</g>';
+    html+=halo(branchText,todayAligned&&i===today.branch&&!isVoid(i)?8:6.5)+'</g>';
   }
   html+='<circle cx="360" cy="360" r="106" fill="#fbfaf6"/><g class="center-direction-band" aria-label="แถบ 8 ธาตุทิศระหว่างเส้นวงกลมรอบศูนย์กลาง">';
   for(let index=0;index<8;index++){
