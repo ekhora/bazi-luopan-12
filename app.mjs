@@ -1,11 +1,13 @@
 import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=33';
-import {branches,phases,profiles,wrap,snap,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=35';
+import {branches,phases,profiles,stemRing,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=35';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
 let mode='phases',birthYear=BIRTH_YEAR,era='BE',cycle=null,selectedYear=birthYear;
 const currentYear=yearNow(new Date());
 let profile='wood', offset=profiles.wood.start, selected=0, practice=false, revealed=false, drag=null, selectedPhase=null;
+let stemRotation=0,stemDestination=0,stemFrame=0;
+const stemColors={wood:'#cfe3c9',fire:'#f3cdb5',earth:'#eadbb0',metal:'#dfe2e5',water:'#c9dcec',void:'#e8e6df'};
 let rotation=offset*30, destination=rotation, motionFrame=0, dragFrame=0;
 const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
 const colors={spring:'#dfecdd',summer:'#f6dfcc',autumn:'#ece2c6',winter:'#dce8eb'};
@@ -35,6 +37,14 @@ function arcLabel(radius,angle,text,size,color,id,centered=false,halfAngle=14){
 function renderWheel(){
   const p=profiles[profile];
   let html='<circle cx="360" cy="360" r="343" fill="#fbfaf6" stroke="#c9cdbb"/><circle cx="360" cy="360" r="309" fill="none" stroke="#d9ddcc"/>';
+  html+='<g class="stem-ring" tabindex="0" role="slider" aria-label="วงก้านฟ้านอกสุด ลากหรือใช้ลูกศรหมุน ก้านหยางล็อกกับกิ่งหยาง ก้านหยินล็อกกับกิ่งหยิน"><circle cx="360" cy="360" r="398" fill="#fbfaf6" stroke="#c9cdbb"/>';
+  stemRing.forEach((s,k)=>{
+    const a=k*30+stemRotation,void_=s.element==='void';
+    html+=`<g class="stem" data-stem="${k}"><path d="${sector(349,396,a,14.6)}" fill="${stemColors[s.element]}" stroke="#fbfaf6" stroke-width="2"/>`;
+    html+=arcLabel(void_?374:373,a,s.han,void_?24:30,'#2e463c',`stem-han-${k}`,true,void_?10:8);
+    html+=arcLabel(void_?358:357,a,void_?s.mark:s.reading,void_?15:13,'#65745f',`stem-sub-${k}`,true,10)+'</g>';
+  });
+  html+='</g>';
   html+='<g class="outer-ring" tabindex="0" role="slider" aria-label="ตำแหน่งวงฉางเซิง ใช้ลูกศรซ้ายหรือขวาหมุนทีละช่อง" aria-valuemin="0" aria-valuemax="11" aria-valuenow="'+offset+'" aria-valuetext="'+(practice?'โหมดท่องจำ':'長生 ตรงกับ '+branches[offset].han+' '+branches[offset].zodiac)+'">';
   for(let i=0;i<12;i++){
     const a=i*30+rotation,show=!practice||(revealed&&wrap(i+offset)===selected);
@@ -66,9 +76,9 @@ function renderWheel(){
   html+=`<g class="center-profile" data-center-profile="${profile}" tabindex="0" role="button" aria-label="${p.han} ${p.reading} ${p.name} แตะเพื่อเปลี่ยนเป็น ${next.han} ${next.name}"><circle cx="360" cy="345" r="54" fill="transparent"/>${label(0,0,p.han,48,p.color,-24)}</g>`;
   html+=label(0,0,p.name,20,'#34483b',20)+label(0,0,'12 กิ่งดิน',16,'#87907c',51);
   const active=document.activeElement;
-  const focus=active?.closest('[data-center-profile]')?'center':active?.dataset.phase!==undefined?'phase-'+active.dataset.phase:active?.closest('.outer-ring')?'outer':active?.dataset.branch;
+  const focus=active?.closest('[data-center-profile]')?'center':active?.dataset.phase!==undefined?'phase-'+active.dataset.phase:active?.closest('.stem-ring')?'stem':active?.closest('.outer-ring')?'outer':active?.dataset.branch;
   svg.innerHTML=html;
-  if(focus!==undefined){const target=focus==='center'?svg.querySelector('[data-center-profile]'):focus==='outer'?svg.querySelector('.outer-ring'):focus.startsWith('phase-')?svg.querySelector(`[data-phase="${focus.slice(6)}"]`):svg.querySelector(`[data-branch="${focus}"]`);target?.focus({preventScroll:true});}
+  if(focus!==undefined){const target=focus==='center'?svg.querySelector('[data-center-profile]'):focus==='stem'?svg.querySelector('.stem-ring'):focus==='outer'?svg.querySelector('.outer-ring'):focus.startsWith('phase-')?svg.querySelector(`[data-phase="${focus.slice(6)}"]`):svg.querySelector(`[data-branch="${focus}"]`);target?.focus({preventScroll:true});}
 }
 function renderControls(){
   const p=profiles[profile];
@@ -95,6 +105,21 @@ function animateTo(target){
   motionFrame=requestAnimationFrame(frame);
 }
 function rotate(step){animateTo((motionFrame?destination:Math.round(rotation/30)*30)+step*direction*30);}
+function animateStem(target){
+  cancelAnimationFrame(stemFrame);stemDestination=target;
+  const start=stemRotation,delta=target-start,duration=reducedMotion.matches?0:180;
+  if(!duration||Math.abs(delta)<.01){stemRotation=target;renderWheel();return;}
+  let began;
+  const frame=time=>{
+    if(began===undefined)began=time;
+    const progress=Math.min(1,(time-began)/duration);
+    stemRotation=start+delta*(1-Math.pow(1-progress,3));renderWheel();
+    if(progress<1)stemFrame=requestAnimationFrame(frame);else{stemFrame=0;stemRotation=target;}
+  };
+  stemFrame=requestAnimationFrame(frame);
+}
+const lockStem=()=>animateStem(Math.round(stemRotation/60)*60);
+function rotateStem(step){animateStem((stemFrame?stemDestination:Math.round(stemRotation/60)*60)+step*direction*60);}
 function alignProfile(){const target=profiles[profile].start*30;animateTo(rotation+angleDelta(target,((rotation%360)+360)%360));}
 function choosePhase(i){selectedPhase=i;if(practice){selected=wrap(i+offset);revealed=false;}renderWheel();renderControls();svg.querySelector(`[data-phase="${i}"]`)?.focus({preventScroll:true});}
 function chooseBranch(i){selected=i;revealed=false;renderWheel();renderControls();svg.querySelector(`[data-branch="${i}"]`)?.focus({preventScroll:true});}
@@ -110,26 +135,31 @@ svg.addEventListener('keydown',e=>{
   if(phase&&(e.key==='Enter'||e.key===' ')){e.preventDefault();choosePhase(Number(phase.dataset.phase));return;}
   const branch=e.target.closest('[data-branch]');
   if(branch&&(e.key==='Enter'||e.key===' ')){e.preventDefault();chooseBranch(Number(branch.dataset.branch));}
+  if(e.target.closest('.stem-ring')&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){
+    e.preventDefault();rotateStem(['ArrowRight','ArrowDown'].includes(e.key)?1:-1);svg.querySelector('.stem-ring')?.focus({preventScroll:true});return;
+  }
   if(e.target.closest('.outer-ring')&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){
     e.preventDefault();rotate(['ArrowRight','ArrowDown'].includes(e.key)?1:-1);svg.querySelector('.outer-ring')?.focus({preventScroll:true});
   }
 });
 function pointerAngle(e){const box=svg.getBoundingClientRect();return Math.atan2(e.clientX-box.left-box.width/2,-(e.clientY-box.top-box.height/2))*180/Math.PI;}
 svg.addEventListener('pointerdown',e=>{
-  if(!e.target.closest('.outer-ring')||!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0))return;
-  e.preventDefault();cancelMotion();drag={id:e.pointerId,last:pointerAngle(e),x:e.clientX,y:e.clientY,moved:false,phase:e.target.closest('[data-phase]')?.dataset.phase};revealed=false;renderControls();svg.setPointerCapture(e.pointerId);svg.classList.add('dragging');$('step-status').textContent='ปล่อยเพื่อลงล็อก';
+  const ringName=e.target.closest('.stem-ring')?'stem':e.target.closest('.outer-ring')?'phase':null;
+  if(!ringName||!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0))return;
+  e.preventDefault();cancelMotion();cancelAnimationFrame(stemFrame);stemFrame=0;drag={ring:ringName,id:e.pointerId,last:pointerAngle(e),x:e.clientX,y:e.clientY,moved:false,phase:e.target.closest('[data-phase]')?.dataset.phase};revealed=false;renderControls();svg.setPointerCapture(e.pointerId);svg.classList.add('dragging');$('step-status').textContent='ปล่อยเพื่อลงล็อก';
 });
 svg.addEventListener('pointermove',e=>{
   if(!drag||e.pointerId!==drag.id)return;
   if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<6)return;
   drag.moved=true;
-  const angle=pointerAngle(e);rotation+=direction*angleDelta(angle,drag.last);drag.last=angle;
+  const angle=pointerAngle(e),delta=direction*angleDelta(angle,drag.last);if(drag.ring==='stem')stemRotation+=delta;else rotation+=delta;drag.last=angle;
   if(!dragFrame)dragFrame=requestAnimationFrame(()=>{dragFrame=0;renderWheel();});
 });
 function stopDrag(e){
   if(!drag||e.pointerId!==drag.id)return;
-  const tappedPhase=!drag.moved?drag.phase:undefined;
+  const tappedPhase=!drag.moved?drag.phase:undefined,drag0=drag;
   drag=null;svg.classList.remove('dragging');if(svg.hasPointerCapture(e.pointerId))svg.releasePointerCapture(e.pointerId);
+  if(drag0.ring==='stem'){lockStem();return;}
   animateTo(Math.round(rotation/30)*30);
   if(e.type==='pointerup'&&tappedPhase!==undefined)choosePhase(Number(tappedPhase));
 }

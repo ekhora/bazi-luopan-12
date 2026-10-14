@@ -32,3 +32,14 @@ test('ลูกศรตามธาตุและแตะกลางวง�
   assert.deepEqual(order.map(profilePeakBranch),[3,6,9,0]);
   for(const profile of order)assert.equal(phaseAt(profilePeakBranch(profile),profiles[profile].start).han,'帝旺');
 });
+
+import {stemRing,snapStem,stemAtBranch} from '../core.mjs';
+test('วงก้านฟ้ามี 10 ก้าน + 空亡陽/陰 และหยางล็อกกับกิ่งหยางเสมอ',()=>{
+  assert.equal(stemRing.map(s=>s.han).join(''),'甲乙丙丁戊己庚辛壬癸空亡空亡');
+  assert.deepEqual(stemRing.slice(10).map(s=>s.mark),['陽','陰']);
+  for(const deg of [-100,-31,0,29,31,59,61,95,359,500]){
+    const shift=snapStem(deg);assert.equal(shift%2,0);
+    for(let b=0;b<12;b++)assert.equal(stemAtBranch(b,shift).polarity,b%2===0?'yang':'yin');
+  }
+  assert.equal(stemAtBranch(0,0).han,'甲');assert.equal(stemAtBranch(10,0).mark,'陽');assert.equal(stemAtBranch(11,0).mark,'陰');
+});

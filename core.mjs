@@ -29,3 +29,12 @@ export function nextProfile(key){
   return keys[(index+1)%keys.length];
 }
 export const profilePeakBranch=key=>wrap(profiles[key].start+4);
+// วงก้านฟ้านอกสุด: 10 ก้านฟ้า + 空亡陽/空亡陰 (ช่องที่ k เป็นหยางเมื่อ k เป็นเลขคู่)
+export const stemRing = [
+  ['甲','เจี่ย','wood'],['乙','อี่','wood'],['丙','ปิ่ง','fire'],['丁','ติง','fire'],['戊','อู้','earth'],
+  ['己','จี่','earth'],['庚','เกิง','metal'],['辛','ซิน','metal'],['壬','เหริน','water'],['癸','กุ่ย','water'],
+  ['空亡','คงหวาง','void','陽'],['空亡','คงหวาง','void','陰']
+].map(([han,reading,element,mark],slot)=>({han,reading,element,polarity:slot%2===0?'yang':'yin',mark:mark||(slot%2===0?'陽':'陰')}));
+// หมุนทีละ 60° เท่านั้น เพื่อให้ช่องหยางทับกิ่งดินหยางและช่องหยินทับกิ่งดินหยิน (กิ่ง index คู่ = หยาง)
+export const snapStem = degrees => wrap(Math.round(degrees / 60) * 2);
+export const stemAtBranch = (branchIndex, shift) => stemRing[wrap(branchIndex - shift)];
