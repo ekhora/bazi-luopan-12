@@ -40,3 +40,6 @@ footer{flex-wrap:wrap;row-gap:6px}footer .copyright{flex-basis:100%;margin:0;tex
 #settings-dialog[data-mode=years] [data-for=phases],#settings-dialog[data-mode=phases] [data-for=years]{display:none!important}
 .seasons[hidden]{display:none}
 .spin-view.spin-back{right:42px}
+/* ฟอนต์ย่อยเฉพาะ ♈–♓ (Noto Sans Symbols 2, OFL) ฝังในเว็บ เพื่อให้เป็นสัญลักษณ์ ไม่กลายเป็น emoji */
+@font-face{font-family:'Zodiac Symbols';src:url('./zodiac-symbols.woff2') format('woff2');font-display:block}
+#wheel .western-glyph{font-family:'Zodiac Symbols','Noto Sans Symbols 2','Segoe UI Symbol','Apple Symbols',serif;font-variant-emoji:text}

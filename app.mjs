@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=69';
-import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=69';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=70';
+import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=70';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -10,9 +10,9 @@ const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
 let today=dayPillar(new Date());
 // ตอนโหลด หมุนวง 12 วัฏจักรไปยังซาฮะของกิ่งดินวันนี้ ให้ลูกศรชี้ตี้วั่งของธาตุนั้น
 profile=sanheProfile(today.branch);offset=profiles[profile].start;
-let showStems=true,showPhases=true;try{showStems=localStorage.getItem('showStems')!=='0';showPhases=localStorage.getItem('showPhases')!=='0';}catch{}
+let showStems=true,showPhases=true,showWestern=false;try{showStems=localStorage.getItem('showStems')!=='0';showPhases=localStorage.getItem('showPhases')!=='0';showWestern=localStorage.getItem('showWestern')==='1';}catch{}
 // รัศมีวงปรับอัตโนมัติตามวงที่เปิด: ก้านฟ้าชิดวงถัดเข้าไป และ viewBox พอดีวงนอกสุด
-const targetLayout=()=>{const stemIn=showPhases?349:204,extent=showStems?stemIn+49:showPhases?343:200;return {stemIn,extent,stemAlpha:showStems?1:0,phaseAlpha:showPhases?1:0};};
+const targetLayout=()=>{const stemIn=showPhases?349:204,base=showStems?stemIn+50:showPhases?343:200,westIn=base+4,extent=showWestern?westIn+40:base;return {stemIn,westIn,extent,stemAlpha:showStems?1:0,phaseAlpha:showPhases?1:0,westAlpha:showWestern?1:0};};
 let layout=targetLayout(),layoutFrame=0;
 function animateLayout(){
   cancelAnimationFrame(layoutFrame);
@@ -27,6 +27,8 @@ function animateLayout(){
   layoutFrame=requestAnimationFrame(frame);
 }
 let stemRotation=pillarShift(today)*30,stemDestination=stemRotation,stemFrame=0;
+const westernSigns=[['♈','เมษ','fire'],['♉','พฤษภ','earth'],['♊','เมถุน','air'],['♋','กรกฎ','water'],['♌','สิงห์','fire'],['♍','กันย์','earth'],['♎','ตุลย์','air'],['♏','พิจิก','water'],['♐','ธนู','fire'],['♑','มังกร','earth'],['♒','กุมภ์','air'],['♓','มีน','water']];
+const westernColors={fire:'#f6dccb',earth:'#ece2c6',air:'#e6e9ee',water:'#d8e6ec'};
 const stemColors={wood:'#bfd8b8',fire:'#eebda1',earth:'#e1cf9c',metal:'#d2d6da',water:'#b8d0e4',void:'#eeede8'};
 // พื้นวงกิ่งดินเข้มกว่าสีฤดูของก้นหอยเล็กน้อย
 const branchColors={spring:'#d2e3cf',summer:'#efd2bb',autumn:'#e3d6b4',winter:'#cfdee2'},branchSelectedColors={spring:'#c2d6bd',summer:'#e5c3a7',autumn:'#d6c79f',winter:'#bfd2d8'};
@@ -76,7 +78,7 @@ function arcLabel(radius,angle,text,size,color,id,centered=false,halfAngle=14){
 function renderWheel(){
   viewOffset=viewRotation;
   const p=profiles[profile];
-  const {stemIn,extent,stemAlpha,phaseAlpha}=layout,pad=extent+8;
+  const {stemIn,westIn,extent,stemAlpha,phaseAlpha,westAlpha}=layout,pad=extent+8;
   svg.setAttribute('viewBox',`${360-pad} ${360-pad} ${pad*2} ${pad*2}`);
   let html='<circle cx="360" cy="360" r="200" fill="#fbfaf6" stroke="#c9cdbb"/>',stemHtml='';
   if(phaseAlpha>.01){
@@ -117,6 +119,17 @@ function renderWheel(){
   stemHtml+='</g>';
   }
   html+=stemHtml;
+  // วง 12 ราศีตะวันตก: เมษเริ่มที่กึ่งกลาง 卯 ไล่ไปทางเดียวกับกิ่งดิน (ดั้งเดิม=ตามเข็ม, สมัยใหม่=ทวนเข็ม)
+  if(westAlpha>.01){
+    html+=`<g class="western-ring" opacity="${westAlpha.toFixed(3)}" pointer-events="none" aria-label="วง 12 ราศีตะวันตก"><circle cx="360" cy="360" r="${westIn+19}" fill="none" stroke="#fbfaf6" stroke-width="40"/><circle cx="360" cy="360" r="${westIn+39}" fill="none" stroke="#c9cdbb"/>`;
+    westernSigns.forEach(([glyph,name,element],k)=>{
+      const a=105+k*30;
+      html+=`<path d="${sector(westIn,westIn+37,a,14.6)}" fill="${westernColors[element]}" stroke="#fbfaf6" stroke-width="2"/>`;
+      const [x,y]=point(westIn+18.5,a);
+      html+=`<text class="western-glyph" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="30" fill="#3f4d46" stroke="#fff" stroke-width="2" paint-order="stroke" aria-label="${name}">${glyph}\uFE0E</text>`;
+    });
+    html+='</g>';
+  }
   const branchFill=i=>{
     const base=selected===i?branchSelectedColors[branches[i].key]:branchColors[branches[i].key];
     return isVoid(i)?fade(base,.62):todayAligned&&i===today.branch?vivid(base):base;
@@ -157,7 +170,7 @@ function renderWheel(){
   if(focus!==undefined){const target=focus==='center'?svg.querySelector('[data-center-profile]'):focus==='stem'?svg.querySelector('.stem-ring'):focus==='outer'?svg.querySelector('.outer-ring'):focus.startsWith('phase-')?svg.querySelector(`[data-phase="${focus.slice(6)}"]`):svg.querySelector(`[data-branch="${focus}"]`);target?.focus({preventScroll:true});}
 }
 function renderControls(){
-  $('stem-toggle').checked=showStems;$('phase-toggle').checked=showPhases;
+  $('stem-toggle').checked=showStems;$('phase-toggle').checked=showPhases;$('western-toggle').checked=showWestern;
   for(const id of ['rotation-controls','step-status','practice-section'])$(id).hidden=!showPhases;
   $('today-pillar').hidden=!showStems;
   $('today-pillar').textContent=`◎ วันนี้ ${stemRing[today.stem].han}${branches[today.branch].han}`;
@@ -214,7 +227,7 @@ function cycleCenterProfile(){profile=nextProfile(profile);alignProfile();svg.qu
 $('prev').addEventListener('click',()=>rotate(-1));$('next').addEventListener('click',()=>rotate(1));
 $('reset').addEventListener('click',alignProfile);
 function toggleRing(key,value){
-  if(key==='showStems')showStems=value;else showPhases=value;
+  if(key==='showStems')showStems=value;else if(key==='showWestern')showWestern=value;else showPhases=value;
   try{localStorage.setItem(key,value?'1':'0');}catch{}
   renderControls();animateLayout();
 }
@@ -228,6 +241,7 @@ function checkDayChange(){
 }
 setInterval(checkDayChange,30000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkDayChange();});
+$('western-toggle').addEventListener('change',e=>toggleRing('showWestern',e.target.checked));
 $('stem-toggle').addEventListener('change',e=>toggleRing('showStems',e.target.checked));
 $('phase-toggle').addEventListener('change',e=>toggleRing('showPhases',e.target.checked));
 $('practice').addEventListener('change',e=>{practice=e.target.checked;revealed=false;renderWheel();renderControls();});
