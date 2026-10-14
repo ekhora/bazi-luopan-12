@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=49';
-import {branches,phases,profiles,stemRing,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=49';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=50';
+import {branches,phases,profiles,stemRing,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=50';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -37,6 +37,8 @@ const highlightedPhases=new Set([0,4,8]);
 const directionElements=['water','earth','wood','wood','fire','earth','metal','metal'];
 const directionColors={wood:'#dfecdd',fire:'#f6dfcc',earth:'#ece2c6',metal:'#e1e4e7',water:'#dce8eb'};
 const darken=(color,f)=>'#'+color.slice(1).match(/../g).map(channel=>Math.round(parseInt(channel,16)*f).toString(16).padStart(2,'0')).join('');
+// ผสมสีเข้าหาพื้นหลังเพื่อให้จางลง (ใช้กับกิ่งดินที่ตก 空亡)
+const fade=(color,f)=>'#'+color.slice(1).match(/../g).map((channel,i)=>Math.round(parseInt(channel,16)*(1-f)+[0xfb,0xfa,0xf6][i]*f).toString(16).padStart(2,'0')).join('');
 const shade=color=>'#'+color.slice(1).match(/../g).map(channel=>Math.round(parseInt(channel,16)*.92).toString(16).padStart(2,'0')).join('');
 // Chinese compass orientation: south above, north below (午 top, 子 bottom).
 const point=(radius,angle)=>[360+radius*Math.sin((direction*angle+180)*Math.PI/180),360-radius*Math.cos((direction*angle+180)*Math.PI/180)];
@@ -79,6 +81,7 @@ function renderWheel(){
   html+='</g></g>';
   }
   // เน้นเสาวันเฉพาะเมื่อวงก้านฟ้าอยู่ตำแหน่งของวันนี้ (หมุนออกแล้วไม่เน้น)
+  const stemShift=wrap(Math.round(stemRotation/30)),isVoid=i=>showStems&&stemAtBranch(i,stemShift).element==='void';
   const todayAligned=showStems&&wrap(Math.round(stemRotation/30))===pillarShift(today);
   if(stemAlpha>.01){
   stemHtml+=`<g class="stem-ring" opacity="${stemAlpha.toFixed(3)}"${showStems?' tabindex="0"':' aria-hidden="true"'} role="slider" aria-label="วงก้านฟ้านอกสุด ลากหรือใช้ลูกศรหมุน ก้านหยางล็อกกับกิ่งหยาง ก้านหยินล็อกกับกิ่งหยิน"><circle cx="360" cy="360" r="${stemIn+24}" fill="none" stroke="#fbfaf6" stroke-width="52"/><circle cx="360" cy="360" r="${stemIn+50}" fill="none" stroke="#c9cdbb"/>`;
@@ -94,10 +97,14 @@ function renderWheel(){
   stemHtml+='</g>';
   }
   html+=stemHtml;
+  const branchFill=i=>{
+    const base=selected===i?branchSelectedColors[branches[i].key]:branchColors[branches[i].key];
+    return isVoid(i)?fade(base,.62):todayAligned&&i===today.branch?darken(base,.86):base;
+  };
   for(let i=0;i<12;i++){
     const b=branches[i],a=i*30;
-    html+=`<g class="branch" data-branch="${i}" tabindex="0" role="button" aria-label="${b.han} ${b.reading} ${b.zodiac} ${b.element} ฤดู${b.season}" aria-pressed="${selected===i}"><path d="${sector(114,196,a)}" fill="${todayAligned&&i===today.branch?darken(selected===i?branchSelectedColors[b.key]:branchColors[b.key],.86):selected===i?branchSelectedColors[b.key]:branchColors[b.key]}" stroke="#fbfaf6" stroke-width="2"/>`;
-    html+=arcLabel(155,a,b.han,44,'#2e463c',`branch-han-${i}`,true)+'</g>';
+    html+=`<g class="branch" data-branch="${i}" tabindex="0" role="button" aria-label="${b.han} ${b.reading} ${b.zodiac} ${b.element} ฤดู${b.season}" aria-pressed="${selected===i}"><path d="${sector(114,196,a)}" fill="${branchFill(i)}" stroke="#fbfaf6" stroke-width="2"/>`;
+    html+=arcLabel(155,a,b.han,44,isVoid(i)?'#a7ada2':'#2e463c',`branch-han-${i}`,true)+'</g>';
   }
   html+='<circle cx="360" cy="360" r="106" fill="#fbfaf6"/><g class="center-direction-band" aria-label="แถบ 8 ธาตุทิศระหว่างเส้นวงกลมรอบศูนย์กลาง">';
   for(let index=0;index<8;index++){
