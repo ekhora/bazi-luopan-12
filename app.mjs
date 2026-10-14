@@ -1,13 +1,15 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=53';
-import {branches,phases,profiles,stemRing,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=53';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=54';
+import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=54';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
 let mode='phases',birthYear=BIRTH_YEAR,era='BE',cycle=null,selectedYear=birthYear;
 const currentYear=yearNow(new Date());
-let profile='wood', offset=profiles.wood.start, selected=0, practice=false, revealed=false, drag=null, selectedPhase=null;
+let profile='wood', offset=0, selected=0, practice=false, revealed=false, drag=null, selectedPhase=null;
 const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
 const today=dayPillar(new Date());
+// ตอนโหลด หมุนวง 12 วัฏจักรไปยังซาฮะของกิ่งดินวันนี้ ให้ลูกศรชี้ตี้วั่งของธาตุนั้น
+profile=sanheProfile(today.branch);offset=profiles[profile].start;
 let showStems=true,showPhases=true;try{showStems=localStorage.getItem('showStems')!=='0';showPhases=localStorage.getItem('showPhases')!=='0';}catch{}
 // รัศมีวงปรับอัตโนมัติตามวงที่เปิด: ก้านฟ้าชิดวงถัดเข้าไป และ viewBox พอดีวงนอกสุด
 const targetLayout=()=>{const stemIn=showPhases?349:204,extent=showStems?stemIn+49:showPhases?343:200;return {stemIn,extent,stemAlpha:showStems?1:0,phaseAlpha:showPhases?1:0};};

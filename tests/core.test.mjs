@@ -55,3 +55,15 @@ test('เสาวันตรงปฏิทินจีนและวงก�
     assert.equal(stemAtBranch(p.branch,pillarShift(p)),stemRing[p.stem]);assert.equal(pillarShift(p)%2,0);
   }
 });
+
+import {sanheProfile} from '../core.mjs';
+test('ซาฮะของกิ่งดินวันนี้ชี้ตี้วั่งของธาตุนั้น',()=>{
+  const groups={water:'申子辰',metal:'巳酉丑',fire:'寅午戌',wood:'亥卯未'},peak={water:'子',metal:'酉',fire:'午',wood:'卯'};
+  for(const [key,chars] of Object.entries(groups))for(const ch of chars){
+    const i=branches.findIndex(b=>b.han===ch);assert.equal(sanheProfile(i),key);
+    assert.equal(branches[profilePeakBranch(key)].han,peak[key]);
+  }
+  const name=d=>{const p=dayPillar(d);return stemRing[p.stem].han+branches[p.branch].han+':'+sanheProfile(p.branch);};
+  assert.equal(name(new Date('2026-10-14T12:00:00+07:00')),'辛酉:metal');
+  assert.equal(name(new Date('2026-10-15T12:00:00+07:00')),'壬戌:fire');
+});
