@@ -204,7 +204,7 @@ function rotateStem(step){animateStem((stemFrame?stemDestination:Math.round(stem
 function goToday(){
   if(!showStems)return;
   const target=pillarShift(today)*30;
-  // กลับวันนี้หมุนช้ากว่าปกติสี่เท่าของปกติ (720 ms) ให้ดูคลาสสิก
+  // กลับวันนี้หมุนช้า (720 ms) ให้ดูคลาสสิก
   animateStem(stemRotation+angleDelta(target,((stemRotation%360)+360)%360),720);
   profile=sanheProfile(today.branch);alignProfile(720);
 }
