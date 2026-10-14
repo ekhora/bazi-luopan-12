@@ -23,3 +23,12 @@ test('ฤดูกาลแบ่งเป็นสี่กลุ่ม กล�
   for(const season of ['spring','summer','autumn','winter'])assert.equal(branches.filter(b=>b.key===season).length,3);
   assert.equal(branches.filter(b=>b.key==='spring').map(b=>b.han).join(''),'寅卯辰');
 });
+
+import {nextProfile,profilePeakBranch} from '../core.mjs';
+test('ลูกศรตามธาตุและแตะกลางวงวนครบไม้ไฟทองน้ำ',()=>{
+  let key='wood';const order=[];
+  for(let index=0;index<4;index++){order.push(key);key=nextProfile(key);}
+  assert.deepEqual(order,['wood','fire','metal','water']);assert.equal(key,'wood');
+  assert.deepEqual(order.map(profilePeakBranch),[3,6,9,0]);
+  for(const profile of order)assert.equal(phaseAt(profilePeakBranch(profile),profiles[profile].start).han,'帝旺');
+});

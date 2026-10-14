@@ -1,5 +1,5 @@
 import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=33';
-import {branches,phases,profiles,wrap,snap,angleDelta} from './core.mjs';
+import {branches,phases,profiles,wrap,snap,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=35';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -62,12 +62,14 @@ function renderWheel(){
     html+=arcLabel(155,a,b.han,44,'#2e463c',`branch-han-${i}`,true)+'</g>';
   }
   html+='<circle cx="360" cy="360" r="106" fill="#fbfaf6" stroke="#d4d9c9"/><circle cx="360" cy="360" r="97" fill="none" stroke="#e6e8dc"/>';
-  html+='<path d="M360 278 L353 296 L360 290 L367 296Z" fill="'+p.color+'"/>';
-  html+=label(0,0,p.han,48,p.color,-24)+label(0,0,p.name,20,'#34483b',20)+label(0,0,'12 กิ่งดิน',16,'#87907c',51);
+  const peak=profilePeakBranch(profile),next=profiles[nextProfile(profile)];
+  html+=`<path class="element-pointer" data-pointer-branch="${branches[peak].han}" aria-label="${p.name} ชี้ ${branches[peak].han}" d="M360 278 L353 296 L360 290 L367 296Z" transform="rotate(${direction*peak*30+180} 360 360)" fill="${p.color}"/>`;
+  html+=`<g class="center-profile" data-center-profile="${profile}" tabindex="0" role="button" aria-label="${p.han} ${p.reading} ${p.name} แตะเพื่อเปลี่ยนเป็น ${next.han} ${next.name}"><circle cx="360" cy="345" r="54" fill="transparent"/>${label(0,0,p.han,48,p.color,-24)}</g>`;
+  html+=label(0,0,p.name,20,'#34483b',20)+label(0,0,'12 กิ่งดิน',16,'#87907c',51);
   const active=document.activeElement;
-  const focus=active?.dataset.phase!==undefined?'phase-'+active.dataset.phase:active?.closest('.outer-ring')?'outer':active?.dataset.branch;
+  const focus=active?.closest('[data-center-profile]')?'center':active?.dataset.phase!==undefined?'phase-'+active.dataset.phase:active?.closest('.outer-ring')?'outer':active?.dataset.branch;
   svg.innerHTML=html;
-  if(focus!==undefined){const target=focus==='outer'?svg.querySelector('.outer-ring'):focus.startsWith('phase-')?svg.querySelector(`[data-phase="${focus.slice(6)}"]`):svg.querySelector(`[data-branch="${focus}"]`);target?.focus({preventScroll:true});}
+  if(focus!==undefined){const target=focus==='center'?svg.querySelector('[data-center-profile]'):focus==='outer'?svg.querySelector('.outer-ring'):focus.startsWith('phase-')?svg.querySelector(`[data-phase="${focus.slice(6)}"]`):svg.querySelector(`[data-branch="${focus}"]`);target?.focus({preventScroll:true});}
 }
 function renderControls(){
   const p=profiles[profile];
@@ -98,13 +100,15 @@ function rotate(step){animateTo((motionFrame?destination:Math.round(rotation/30)
 function alignProfile(){const target=profiles[profile].start*30;animateTo(rotation+angleDelta(target,((rotation%360)+360)%360));}
 function choosePhase(i){selectedPhase=i;if(practice){selected=wrap(i+offset);revealed=false;}renderWheel();renderControls();svg.querySelector(`[data-phase="${i}"]`)?.focus({preventScroll:true});}
 function chooseBranch(i){selected=i;revealed=false;renderWheel();renderControls();svg.querySelector(`[data-branch="${i}"]`)?.focus({preventScroll:true});}
+function cycleCenterProfile(){profile=nextProfile(profile);alignProfile();svg.querySelector('[data-center-profile]')?.focus({preventScroll:true});}
 $('profiles').addEventListener('click',e=>{const button=e.target.closest('[data-profile]');if(!button)return;profile=button.dataset.profile;alignProfile();$('profiles').querySelector(`[data-profile="${profile}"]`).focus({preventScroll:true});});
 $('prev').addEventListener('click',()=>rotate(-1));$('next').addEventListener('click',()=>rotate(1));
 $('reset').addEventListener('click',alignProfile);
 $('practice').addEventListener('change',e=>{practice=e.target.checked;revealed=false;renderWheel();renderControls();});
 $('reveal').addEventListener('click',()=>{revealed=true;renderWheel();renderControls();});
-svg.addEventListener('click',e=>{const branch=e.target.closest('[data-branch]');if(branch)chooseBranch(Number(branch.dataset.branch));});
+svg.addEventListener('click',e=>{if(e.target.closest('[data-center-profile]')){cycleCenterProfile();return;}const branch=e.target.closest('[data-branch]');if(branch)chooseBranch(Number(branch.dataset.branch));});
 svg.addEventListener('keydown',e=>{
+  if(e.target.closest('[data-center-profile]')&&(e.key==='Enter'||e.key===' ')){e.preventDefault();cycleCenterProfile();return;}
   const phase=e.target.closest('[data-phase]');
   if(phase&&(e.key==='Enter'||e.key===' ')){e.preventDefault();choosePhase(Number(phase.dataset.phase));return;}
   const branch=e.target.closest('[data-branch]');

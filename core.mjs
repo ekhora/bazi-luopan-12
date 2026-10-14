@@ -22,3 +22,10 @@ export const wrap = n => ((n % 12) + 12) % 12;
 export const snap = degrees => wrap(Math.round(degrees / 30));
 export const phaseAt = (branchIndex, offset) => phases[wrap(branchIndex-offset)];
 export const angleDelta = (current,previous) => ((current-previous+540)%360)-180;
+
+export function nextProfile(key){
+  const keys=Object.keys(profiles),index=keys.indexOf(key);
+  if(index<0)throw new Error('ธาตุไม่ถูกต้อง');
+  return keys[(index+1)%keys.length];
+}
+export const profilePeakBranch=key=>wrap(profiles[key].start+4);

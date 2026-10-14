@@ -25,3 +25,5 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px}.s
 .birth-hint{font-size:11px;color:var(--muted);margin:8px 0 0;text-align:center}
 
 #wheel .compass-ring{pointer-events:none}
+
+#wheel .center-profile{cursor:pointer;touch-action:manipulation}#wheel .center-profile:focus{outline:none}
