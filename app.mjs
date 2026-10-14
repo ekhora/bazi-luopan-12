@@ -34,7 +34,7 @@ function arcLabel(radius,angle,text,size,color,id,centered=false,halfAngle=14){
 }
 function renderWheel(){
   const p=profiles[profile];
-  let html='<circle cx="360" cy="360" r="361" fill="#fbfaf6" stroke="#c9cdbb"/><circle cx="360" cy="360" r="309" fill="none" stroke="#d9ddcc"/>';
+  let html='<circle cx="360" cy="360" r="343" fill="#fbfaf6" stroke="#c9cdbb"/><circle cx="360" cy="360" r="309" fill="none" stroke="#d9ddcc"/>';
   html+='<g class="outer-ring" tabindex="0" role="slider" aria-label="ตำแหน่งวงฉางเซิง ใช้ลูกศรซ้ายหรือขวาหมุนทีละช่อง" aria-valuemin="0" aria-valuemax="11" aria-valuenow="'+offset+'" aria-valuetext="'+(practice?'โหมดท่องจำ':'長生 ตรงกับ '+branches[offset].han+' '+branches[offset].zodiac)+'">';
   for(let i=0;i<12;i++){
     const a=i*30+rotation,show=!practice||(revealed&&wrap(i+offset)===selected);
@@ -49,13 +49,6 @@ function renderWheel(){
       html+=arcLabel(324,a,'· · ·',16,'#a9ada3',`meaning-${i}`,true);
     }
     html+='</g>';
-  }
-  html+='</g>';
-  const compassLabels=['เหนือ','ตะวันออกเฉียงเหนือ','ตะวันออก','ตะวันออกเฉียงใต้','ใต้','ตะวันตกเฉียงใต้','ตะวันตก','ตะวันตกเฉียงเหนือ'];
-  html+='<g class="compass-ring" aria-label="8 ทิศ เหนืออยู่ล่าง ใต้อยู่บน">';
-  for(let index=0;index<8;index++){
-    const angle=index*45*direction;
-    html+=`<g class="compass-sector" data-compass="${index}"><path d="${sector(337,359,angle,22.5)}" fill="#f2f1ea" stroke="#d9dccf" stroke-width="1"/>${arcLabel(348,angle,compassLabels[index],14,'#92998b',`compass-${index}`,true,20)}</g>`;
   }
   html+='</g>';
   for(let i=0;i<12;i++){
