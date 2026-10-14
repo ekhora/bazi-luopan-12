@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=55';
-import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=55';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=56';
+import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=56';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -245,6 +245,9 @@ function stopDrag(e){
 }
 svg.addEventListener('pointerup',stopDrag);svg.addEventListener('pointercancel',stopDrag);svg.addEventListener('lostpointercapture',stopDrag);
 renderWheel();renderControls();
+// ปีลิขสิทธิ์ตามปีปัจจุบัน (เวลาไทย) ใช้ พ.ศ./ค.ศ. ตามที่เลือกใน Settings
+function renderCopyright(){$('copyright-year').textContent=`${era==='BE'?'พ.ศ. ':''}${displayYear(currentYear,era)}`;}
+renderCopyright();
 
 function spiralArcLabel(entry,offset,text,size,color,key){
   const id=`year-${entry.year}-${key}`;
@@ -309,7 +312,7 @@ function setMode(value){
 }
 function setEra(value){
   let entered;try{entered=parseBirthInput($('birth-input').value.trim(),era,currentYear);}catch{entered={year:birthYear,kind:'year'};}
-  era=value;if(entered.kind==='year')$('birth-input').value=displayYear(entered.year,era);$('birth-era').textContent=era==='BE'?'พ.ศ.':'ค.ศ.';
+  era=value;renderCopyright();if(entered.kind==='year')$('birth-input').value=displayYear(entered.year,era);$('birth-era').textContent=era==='BE'?'พ.ศ.':'ค.ศ.';
   $('era-be').setAttribute('aria-pressed',String(era==='BE'));$('era-ce').setAttribute('aria-pressed',String(era==='CE'));$('birth-error').hidden=true;renderSpiral();
 }
 function selectYear(year){selectedYear=year;if(cycle!==null)cycle=Math.floor((year-birthYear)/12);renderSpiral();$('spiral').querySelector(`[data-year="${year}"]`)?.focus({preventScroll:true});}
