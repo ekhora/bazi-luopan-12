@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=60';
-import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=60';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=61';
+import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=61';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -40,6 +40,8 @@ const directionElements=['water','earth','wood','wood','fire','earth','metal','m
 const directionColors={wood:'#dfecdd',fire:'#f6dfcc',earth:'#ece2c6',metal:'#e1e4e7',water:'#dce8eb'};
 const darken=(color,f)=>'#'+color.slice(1).match(/../g).map(channel=>Math.round(parseInt(channel,16)*f).toString(16).padStart(2,'0')).join('');
 // ผสมสีเข้าหาพื้นหลังเพื่อให้จางลง (ใช้กับกิ่งดินที่ตก 空亡)
+// ขอบขาวรอบตัวอักษรของเสาวันนี้ให้เด่นชัด
+const halo=text=>text.replace('<text ','<text stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" ');
 const fade=(color,f)=>'#'+color.slice(1).match(/../g).map((channel,i)=>Math.round(parseInt(channel,16)*(1-f)+[0xfb,0xfa,0xf6][i]*f).toString(16).padStart(2,'0')).join('');
 // เน้นวันนี้ด้วยสีสดขึ้น: เพิ่มความอิ่มสี (saturation) และลดความสว่างเล็กน้อย ไม่ทำให้หม่นดำ
 const vivid=color=>{
@@ -109,7 +111,7 @@ function renderWheel(){
     if(void_){
       stemHtml+=arcLabel(stemIn+29,a,s.han,22,'#9ea397',`stem-han-${k}`,true,10);
       stemHtml+=arcLabel(stemIn+8,a,s.mark,15,'#b9bcb2',`stem-sub-${k}`,true,10);
-    }else stemHtml+=arcLabel(stemIn+21,a,s.han,34,'#2e463c',`stem-han-${k}`,true,8);
+    }else{const text=arcLabel(stemIn+21,a,s.han,34,'#2e463c',`stem-han-${k}`,true,8);stemHtml+=isToday?halo(text):text;}
     stemHtml+='</g>';
   });
   stemHtml+='</g>';
@@ -122,7 +124,8 @@ function renderWheel(){
   for(let i=0;i<12;i++){
     const b=branches[i],a=i*30;
     html+=`<g class="branch" data-branch="${i}" tabindex="0" role="button" aria-label="${b.han} ${b.reading} ${b.zodiac} ${b.element} ฤดู${b.season}" aria-pressed="${selected===i}"><path${todayAligned&&i===today.branch&&!isVoid(i)?todayPulse:''} d="${sector(114,196,a)}" fill="${branchFill(i)}" stroke="#fbfaf6" stroke-width="2"/>`;
-    html+=arcLabel(155,a,b.han,44,isVoid(i)?'#a7ada2':'#2e463c',`branch-han-${i}`,true)+'</g>';
+    const branchText=arcLabel(155,a,b.han,44,isVoid(i)?'#a7ada2':'#2e463c',`branch-han-${i}`,true);
+    html+=(todayAligned&&i===today.branch&&!isVoid(i)?halo(branchText):branchText)+'</g>';
   }
   html+='<circle cx="360" cy="360" r="106" fill="#fbfaf6"/><g class="center-direction-band" aria-label="แถบ 8 ธาตุทิศระหว่างเส้นวงกลมรอบศูนย์กลาง">';
   for(let index=0;index<8;index++){
@@ -156,9 +159,9 @@ function renderControls(){
   $('reveal').textContent=revealed?'เฉลยแล้ว':'เฉลยช่องที่เลือก';
 }
 function cancelMotion(){cancelAnimationFrame(motionFrame);cancelAnimationFrame(dragFrame);motionFrame=dragFrame=0;}
-function animateTo(target){
+function animateTo(target,ms=180){
   cancelMotion();destination=target;offset=snap(target);revealed=false;renderControls();
-  const start=rotation,delta=target-start,duration=reducedMotion.matches?0:180;
+  const start=rotation,delta=target-start,duration=reducedMotion.matches?0:ms;
   if(!duration||Math.abs(delta)<.01){rotation=target;renderWheel();$('step-status').textContent='ลงล็อกแล้ว · ลากเพื่อหมุน';return;}
   $('step-status').textContent='กำลังลงล็อก';
   let began;
@@ -172,9 +175,9 @@ function animateTo(target){
   motionFrame=requestAnimationFrame(frame);
 }
 function rotate(step){animateTo((motionFrame?destination:Math.round(rotation/30)*30)+step*direction*30);}
-function animateStem(target){
+function animateStem(target,ms=180){
   cancelAnimationFrame(stemFrame);stemDestination=target;
-  const start=stemRotation,delta=target-start,duration=reducedMotion.matches?0:180;
+  const start=stemRotation,delta=target-start,duration=reducedMotion.matches?0:ms;
   if(!duration||Math.abs(delta)<.01){stemRotation=target;renderWheel();return;}
   let began;
   const frame=time=>{
@@ -191,10 +194,11 @@ function rotateStem(step){animateStem((stemFrame?stemDestination:Math.round(stem
 function goToday(){
   if(!showStems)return;
   const target=pillarShift(today)*30;
-  animateStem(stemRotation+angleDelta(target,((stemRotation%360)+360)%360));
-  profile=sanheProfile(today.branch);alignProfile();
+  // กลับวันนี้หมุนช้ากว่าปกติหนึ่งเท่า (360 ms) ให้ดูคลาสสิก
+  animateStem(stemRotation+angleDelta(target,((stemRotation%360)+360)%360),360);
+  profile=sanheProfile(today.branch);alignProfile(360);
 }
-function alignProfile(){const target=profiles[profile].start*30;animateTo(rotation+angleDelta(target,((rotation%360)+360)%360));}
+function alignProfile(ms){const target=profiles[profile].start*30;animateTo(rotation+angleDelta(target,((rotation%360)+360)%360),ms);}
 function choosePhase(i){selectedPhase=i;if(practice){selected=wrap(i+offset);revealed=false;}renderWheel();renderControls();svg.querySelector(`[data-phase="${i}"]`)?.focus({preventScroll:true});}
 function chooseBranch(i){selected=i;revealed=false;renderWheel();renderControls();svg.querySelector(`[data-branch="${i}"]`)?.focus({preventScroll:true});}
 function cycleCenterProfile(){profile=nextProfile(profile);alignProfile();svg.querySelector('[data-center-profile]')?.focus({preventScroll:true});}
