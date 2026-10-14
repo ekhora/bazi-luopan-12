@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=67';
-import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=67';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=68';
+import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=68';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -137,7 +137,7 @@ function renderWheel(){
     html+=`<g class="season-ring" opacity="${(1-phaseAlpha).toFixed(3)}" aria-label="วง 4 ฤดู" pointer-events="none">`;
     [['spring','春','ชุน',90],['summer','夏','เซี่ย',180],['autumn','秋','ชิว',270],['winter','冬','ตง',0]].forEach(([key,han,reading,angle])=>{
       html+=`<path d="${sector(44,93,angle,44)}" fill="${branchColors[key]}" stroke="#fbfaf6" stroke-width="2"/>`;
-      html+=halo(arcLabel(68,angle,`${han}<tspan font-size="13" fill="#65745f"> ${reading}</tspan>`,22,'#2e463c',`season-${key}`,true,40),4);
+      html+=halo(arcLabel(68,angle,han,26,'#2e463c',`season-${key}`,true,20),5);
     });
     html+='<circle cx="360" cy="360" r="42" fill="#fbfaf6" stroke="#e6e8dc"/></g>';
   }
