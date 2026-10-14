@@ -47,3 +47,5 @@ export function dayPillar(date){
 }
 // จำนวนช่องที่ต้องเลื่อนวงก้านฟ้าเพื่อให้ก้านของเสาวันทับกิ่งของเสาวัน
 export const pillarShift = pillar => wrap(pillar.branch - pillar.stem);
+// ซาฮะ (三合) ของกิ่งดิน: 申子辰 น้ำ, 巳酉丑 ทอง, 寅午戌 ไฟ, 亥卯未 ไม้
+export const sanheProfile = branchIndex => ['water','metal','fire','wood'][wrap(branchIndex)%4];
