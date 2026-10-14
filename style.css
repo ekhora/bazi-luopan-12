@@ -28,4 +28,4 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px}.s
 
 #wheel .center-profile{cursor:pointer;touch-action:manipulation}#wheel .center-profile:focus{outline:none}
 
-#wheel .branch-direction-background{pointer-events:none}
+#wheel .center-direction-band{pointer-events:none}

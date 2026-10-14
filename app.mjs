@@ -57,17 +57,17 @@ function renderWheel(){
     const angle=index*45*direction;
     html+=`<g class="compass-sector" data-compass="${index}"><path d="${sector(337,359,angle,22.5)}" fill="#f2f1ea" stroke="#d9dccf" stroke-width="1"/>${arcLabel(348,angle,compassLabels[index],14,'#92998b',`compass-${index}`,true,20)}</g>`;
   }
-  html+='</g><g class="branch-direction-background" aria-label="พื้นธาตุของ 8 ทิศ">';
-  for(let index=0;index<8;index++){
-    html+=`<path data-direction-element="${directionElements[index]}" data-direction-sector="${index}" d="${sector(114,196,index*45*direction,22.5)}" fill="${directionColors[directionElements[index]]}"/>`;
-  }
   html+='</g>';
   for(let i=0;i<12;i++){
     const b=branches[i],a=i*30;
-    html+=`<g class="branch" data-branch="${i}" tabindex="0" role="button" aria-label="${b.han} ${b.reading} ${b.zodiac} ${b.element} ฤดู${b.season}" aria-pressed="${selected===i}"><path d="${sector(114,196,a)}" fill="#263b33" fill-opacity="${selected===i?.06:0}" stroke="#fbfaf6" stroke-width="2"/>`;
+    html+=`<g class="branch" data-branch="${i}" tabindex="0" role="button" aria-label="${b.han} ${b.reading} ${b.zodiac} ${b.element} ฤดู${b.season}" aria-pressed="${selected===i}"><path d="${sector(114,196,a)}" fill="${selected===i?selectedColors[b.key]:colors[b.key]}" stroke="#fbfaf6" stroke-width="2"/>`;
     html+=arcLabel(155,a,b.han,44,'#2e463c',`branch-han-${i}`,true)+'</g>';
   }
-  html+='<circle cx="360" cy="360" r="106" fill="#fbfaf6" stroke="#d4d9c9"/><circle cx="360" cy="360" r="97" fill="none" stroke="#e6e8dc"/>';
+  html+='<circle cx="360" cy="360" r="106" fill="#fbfaf6"/><g class="center-direction-band" aria-label="แถบ 8 ธาตุทิศระหว่างเส้นวงกลมรอบศูนย์กลาง">';
+  for(let index=0;index<8;index++){
+    html+=`<path data-direction-element="${directionElements[index]}" data-direction-sector="${index}" d="${sector(97,106,index*45*direction,22.5)}" fill="${directionColors[directionElements[index]]}"/>`;
+  }
+  html+='</g><circle cx="360" cy="360" r="106" fill="none" stroke="#d4d9c9"/><circle cx="360" cy="360" r="97" fill="none" stroke="#e6e8dc"/>';
   const peak=profilePeakBranch(profile),next=profiles[nextProfile(profile)];
   html+=`<path class="element-pointer" data-pointer-branch="${branches[peak].han}" aria-label="${p.name} ชี้ ${branches[peak].han}" d="M360 278 L353 296 L360 290 L367 296Z" transform="rotate(${direction*peak*30+180} 360 360)" fill="${p.color}"/>`;
   html+=`<g class="center-profile" data-center-profile="${profile}" tabindex="0" role="button" aria-label="${p.han} ${p.reading} ${p.name} แตะเพื่อเปลี่ยนเป็น ${next.han} ${next.name}"><circle cx="360" cy="345" r="54" fill="transparent"/>${label(0,0,p.han,48,p.color,-24)}</g>`;
