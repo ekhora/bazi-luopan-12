@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=62';
-import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=62';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=63';
+import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=63';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -40,8 +40,8 @@ const directionElements=['water','earth','wood','wood','fire','earth','metal','m
 const directionColors={wood:'#dfecdd',fire:'#f6dfcc',earth:'#ece2c6',metal:'#e1e4e7',water:'#dce8eb'};
 const darken=(color,f)=>'#'+color.slice(1).match(/../g).map(channel=>Math.round(parseInt(channel,16)*f).toString(16).padStart(2,'0')).join('');
 // ผสมสีเข้าหาพื้นหลังเพื่อให้จางลง (ใช้กับกิ่งดินที่ตก 空亡)
-// ขอบขาวรอบตัวอักษรของเสาวันนี้ให้เด่นชัด
-const halo=text=>text.replace('<text ','<text stroke="#fff" stroke-width="5" stroke-linejoin="round" paint-order="stroke" ');
+// ขอบขาวรอบอักษรก้านฟ้า/กิ่งดินทุกตัว เสาวันนี้หนากว่า
+const halo=(text,width=2.5)=>text.replace('<text ',`<text stroke="#fff" stroke-width="${width}" stroke-linejoin="round" paint-order="stroke" `);
 const fade=(color,f)=>'#'+color.slice(1).match(/../g).map((channel,i)=>Math.round(parseInt(channel,16)*(1-f)+[0xfb,0xfa,0xf6][i]*f).toString(16).padStart(2,'0')).join('');
 // เน้นวันนี้ด้วยสีสดขึ้น: เพิ่มความอิ่มสี (saturation) และลดความสว่างเล็กน้อย ไม่ทำให้หม่นดำ
 const vivid=color=>{
@@ -109,9 +109,9 @@ function renderWheel(){
     const a=k*30+stemRotation,void_=s.element==='void',isToday=todayAligned&&k===today.stem;
     stemHtml+=`<g class="stem" data-stem="${k}"${isToday?' data-today="true"':''}><path${isToday?todayPulse:''} d="${sector(stemIn,stemIn+47,a,14.6)}" fill="${isToday?(s.element==='metal'?'#b3bdc8':vivid(stemColors[s.element])):stemColors[s.element]}" stroke="#fbfaf6" stroke-width="2"/>`;
     if(void_){
-      stemHtml+=arcLabel(stemIn+29,a,s.han,22,'#9ea397',`stem-han-${k}`,true,10);
-      stemHtml+=arcLabel(stemIn+8,a,s.mark,15,'#b9bcb2',`stem-sub-${k}`,true,10);
-    }else{const text=arcLabel(stemIn+21,a,s.han,34,'#2e463c',`stem-han-${k}`,true,8);stemHtml+=isToday?halo(text):text;}
+      stemHtml+=halo(arcLabel(stemIn+29,a,s.han,22,'#9ea397',`stem-han-${k}`,true,10),2);
+      stemHtml+=halo(arcLabel(stemIn+8,a,s.mark,15,'#b9bcb2',`stem-sub-${k}`,true,10),2);
+    }else{const text=arcLabel(stemIn+21,a,s.han,34,'#2e463c',`stem-han-${k}`,true,8);stemHtml+=halo(text,isToday?6:2.5);}
     stemHtml+='</g>';
   });
   stemHtml+='</g>';
@@ -125,7 +125,7 @@ function renderWheel(){
     const b=branches[i],a=i*30;
     html+=`<g class="branch" data-branch="${i}" tabindex="0" role="button" aria-label="${b.han} ${b.reading} ${b.zodiac} ${b.element} ฤดู${b.season}" aria-pressed="${selected===i}"><path${todayAligned&&i===today.branch&&!isVoid(i)?todayPulse:''} d="${sector(114,196,a)}" fill="${branchFill(i)}" stroke="#fbfaf6" stroke-width="2"/>`;
     const branchText=arcLabel(155,a,b.han,44,isVoid(i)?'#a7ada2':'#2e463c',`branch-han-${i}`,true);
-    html+=(todayAligned&&i===today.branch&&!isVoid(i)?halo(branchText):branchText)+'</g>';
+    html+=halo(branchText,todayAligned&&i===today.branch&&!isVoid(i)?6.5:2.5)+'</g>';
   }
   html+='<circle cx="360" cy="360" r="106" fill="#fbfaf6"/><g class="center-direction-band" aria-label="แถบ 8 ธาตุทิศระหว่างเส้นวงกลมรอบศูนย์กลาง">';
   for(let index=0;index<8;index++){
