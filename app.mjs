@@ -1,5 +1,5 @@
-import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=70';
-import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=70';
+import {BIRTH_YEAR,yearNow,displayYear,shortYear,parseBirthInput,spiralYears,spiralPoint,spiralCell,spiralTextPath,spiralSlice,zodiacRoundEnd} from './spiral.mjs?v=71';
+import {branches,phases,profiles,stemRing,sanheProfile,stemAtBranch,dayPillar,pillarShift,wrap,snap,snapStem,angleDelta,nextProfile,profilePeakBranch} from './core.mjs?v=71';
 const $ = id => document.getElementById(id);
 const svg = $('wheel');
 let direction=1;
@@ -125,8 +125,8 @@ function renderWheel(){
     westernSigns.forEach(([glyph,name,element],k)=>{
       const a=105+k*30;
       html+=`<path d="${sector(westIn,westIn+37,a,14.6)}" fill="${westernColors[element]}" stroke="#fbfaf6" stroke-width="2"/>`;
-      const [x,y]=point(westIn+18.5,a);
-      html+=`<text class="western-glyph" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="30" fill="#3f4d46" stroke="#fff" stroke-width="2" paint-order="stroke" aria-label="${name}">${glyph}\uFE0E</text>`;
+      // สัญลักษณ์โค้งตามรัศมีวงเหมือนอักษรวงอื่น
+      html+=arcLabel(westIn+18.5,a,`${glyph}\uFE0E`,30,'#3f4d46',`western-${k}`,true,12).replace('<text ',`<text class="western-glyph" aria-label="${name}" stroke="#fff" stroke-width="2" paint-order="stroke" `);
     });
     html+='</g>';
   }
