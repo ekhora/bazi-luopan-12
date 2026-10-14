@@ -6,12 +6,12 @@
   <meta name="description" content="วงล้อ 12 กิ่งดินสำหรับมือถือ หมุนฉางเซิงตามนิ้วและลงล็อกเมื่อปล่อย สำหรับฝึกท่องจำปาจื้อ">
   <title>วงล้อฉางเซิง · 12 กิ่งดิน</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=46">
+  <link rel="stylesheet" href="./style.css?v=48">
   <script>
     // แสดงข้อผิดพลาดบนหน้าเว็บ หากโมดูลโหลดไม่ผ่าน (ช่วยวินิจฉัยบนมือถือ)
     addEventListener('error',e=>{const el=document.getElementById('step-status');if(el)el.textContent='เกิดข้อผิดพลาด: '+(e.message||e.target?.src||'โหลดไฟล์ไม่สำเร็จ')+' · ลองรีเฟรช';},true);
   </script>
-  <script type="module" src="./app.mjs?v=46"></script>
+  <script type="module" src="./app.mjs?v=48"></script>
 </head>
 <body>
   <header><a class="brand" href="./"><span class="brand-icon">十二</span><h1>วงล้อฉางเซิง<small>12 กิ่งดิน · สือเอ้อร์ฉางเซิง</small></h1></a><button id="settings-open" class="settings-button" aria-label="ตั้งค่า" aria-haspopup="dialog" title="ตั้งค่า">⚙</button></header>
@@ -19,10 +19,10 @@
     <div class="mode-switch" aria-label="เลือกแบบวง"><button id="mode-phases" aria-pressed="true">12 วัฏจักร</button><button id="mode-years" aria-pressed="false">ปีและอายุ</button></div>
     <div id="phase-view">
     <section class="wheel-area" aria-label="วงล้อสำหรับท่องจำ">
-      <div class="wheel-caption"><span class="dot"></span><span id="today-pillar" class="today-pillar"></span><span id="alignment">ไม้หยาง · ตำแหน่งตามหลัก</span></div>
+      <div id="wheel-caption" class="wheel-caption"><span class="dot"></span><span id="today-pillar" class="today-pillar"></span><span id="alignment">ไม้หยาง · ตำแหน่งตามหลัก</span></div>
       <svg id="wheel" viewBox="-34 -34 788 788" role="group" aria-label="วงล้อ 12 กิ่งดิน ลากวงนอกเพื่อหมุน ปล่อยเพื่อลงล็อก"></svg>
       <div class="seasons" aria-label="สีฤดูกาล"><span class="spring">ใบไม้ผลิ</span><span class="summer">ร้อน</span><span class="autumn">ใบไม้ร่วง</span><span class="winter">หนาว</span></div>
-      <div class="rotation-controls"><button id="prev" aria-label="หมุนวงนอกทวนเข็มหนึ่งช่อง">↶ ย้อน</button><button id="reset" aria-label="กลับตำแหน่งของธาตุที่เลือก">↺ กลับตำแหน่ง</button><button id="next" aria-label="หมุนวงนอกตามเข็มหนึ่งช่อง">ถัดไป ↷</button></div>
+      <div id="rotation-controls" class="rotation-controls"><button id="prev" aria-label="หมุนวงนอกทวนเข็มหนึ่งช่อง">↶ ย้อน</button><button id="reset" aria-label="กลับตำแหน่งของธาตุที่เลือก">↺ กลับตำแหน่ง</button><button id="next" aria-label="หมุนวงนอกตามเข็มหนึ่งช่อง">ถัดไป ↷</button></div>
       <p id="step-status" class="step-status" aria-live="polite">ลากเพื่อหมุน · ปล่อยเพื่อลงล็อก</p>
     </section>
     <div class="practice-controls"><button id="reveal" hidden>เฉลยช่องที่เลือก</button></div>
@@ -46,7 +46,10 @@
     <section class="settings-section"><h3>วงก้านฟ้า</h3>
       <div class="practice-controls"><label class="switch"><input id="stem-toggle" type="checkbox" checked aria-label="เปิดหรือปิดวงก้านฟ้านอกสุด"><span class="switch-track"></span><span>แสดงวงก้านฟ้า</span></label></div>
     </section>
-    <section class="settings-section"><h3>การฝึกท่องจำ</h3>
+    <section class="settings-section"><h3>วง 12 วัฏจักร</h3>
+      <div class="practice-controls"><label class="switch"><input id="phase-toggle" type="checkbox" checked aria-label="เปิดหรือปิดวง 12 วัฏจักร"><span class="switch-track"></span><span>แสดงวง 12 วัฏจักร</span></label></div>
+    </section>
+    <section id="practice-section" class="settings-section"><h3>การฝึกท่องจำ</h3>
       <div class="practice-controls"><label class="switch"><input id="practice" type="checkbox" aria-label="เปิดโหมดท่องจำ"><span class="switch-track"></span><span>ท่องจำ</span></label></div>
     </section>
     <section class="settings-section"><h3>ปีและอายุ</h3>
